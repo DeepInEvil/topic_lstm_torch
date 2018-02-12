@@ -81,7 +81,7 @@ def eval(data_iter, model, args):
         loss = F.cross_entropy(logit, target, size_average=False)
 
         avg_loss += loss.data[0]
-        corrects += (torch.max(logit, 1)
+        corrects += (torch .max(logit, 1)
                      [1].view(target.size()).data == target.data).sum()
 
     size = len(data_iter.dataset)
