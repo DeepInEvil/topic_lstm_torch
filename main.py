@@ -55,8 +55,7 @@ def get_index_to_embeddings_mapping(vocab, word_vecs):
     embeddings = {}
     for word in vocab.stoi.keys():
         try:
-	    print word
-            embeddings[word] = word_vecs[word]
+            embeddings[vocab.stoi[word]] = word_vecs[word]
         except KeyError:
             # map index to small random vector
             # print "No embedding for word '"  + word + "'"
@@ -148,7 +147,7 @@ else:
             args.embed_num = len(text_field.vocab)
             args.class_num = len(label_field.vocab) - 1
             corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
-            index_to_vector_map = get_index_to_embeddings_mapping(vocab, corpus_wordvec)
+            index_to_vector_map = torch.FloatTensor(get_index_to_embeddings_mapping(vocab, corpus_wordvec))
             lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
                                             batch_size=args.batch_size, use_gpu=args.cuda)
             train.train(train_iter, dev_iter, vocab, lstm, args)
