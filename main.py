@@ -53,8 +53,9 @@ def get_index_to_embeddings_mapping(vocab, word_vecs):
     :return:
     """
     embeddings = {}
-    for word in vocab.keys():
+    for word in vocab.stoi.keys():
         try:
+	    print word
             embeddings[word] = word_vecs[word]
         except KeyError:
             # map index to small random vector
@@ -90,7 +91,6 @@ def get_data(text_field, label_field, domain):
     TEXT.build_vocab(train, val)
     LABELS.build_vocab(train, val)
     train_vocab = TEXT.vocab
-    print train_vocab.freqs
     print len(val), len(test)
     train_iter, dev_iter, test_iter = data.BucketIterator.splits(
                                 (train, val, test), device = -1,
@@ -143,11 +143,12 @@ else:
             text_field = data.Field(lower=True)
             label_field = data.Field(sequential=False)
             train_iter, dev_iter, test_iter, vocab = get_data(
-                '/home/deep/cnn-text-classification-pytorch/reviews/leave_out_kitchen/', text_field, label_field)
+                text_field, label_field, domain)
+            print vocab.stoi['you']
             args.embed_num = len(text_field.vocab)
             args.class_num = len(label_field.vocab) - 1
             corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
-            index_to_vector_map = get_index_to_embeddings_mapping(vocab.itos, corpus_wordvec)
+            index_to_vector_map = get_index_to_embeddings_mapping(vocab, corpus_wordvec)
             lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
                                             batch_size=args.batch_size, use_gpu=args.cuda)
             train.train(train_iter, dev_iter, vocab, lstm, args)
