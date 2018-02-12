@@ -4,12 +4,10 @@ import argparse
 import datetime
 import torch
 import torchtext.data as data
-import torchtext.datasets as datasets
-from tensorflow.python.debug.lib.debug_data import device_name_to_device_path
-
 import LSTMmodel
 import train
-import mydatasets
+import numpy as np
+from gensim.models import word2vec
 
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
@@ -28,7 +26,7 @@ parser.add_argument('-shuffle', action='store_true', default=False, help='shuffl
 # model
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
 parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]')
-parser.add_argument('-embed-dim', type=int, default=128, help='number of embedding dimension [default: 128]')
+parser.add_argument('-embed-dim', type=int, default=300, help='number of embedding dimension [default: 128]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
 parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
@@ -41,11 +39,35 @@ parser.add_argument('-snapshot', type=str, default=None, help='filename of model
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 args = parser.parse_args()
-review_dir = '/home/deep/cnn-text-classification-pytorch/topic_lstm_torch/reviews/'
+review_dir = '/data/dchaudhu/topic_lstm_torch/reviews/'
+lda_model = '/data/dchaudhu/topic_lstm_torch/lda_models/amazon_lda'
+word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
+domains = ['electronics', 'books', 'kitchen', 'dvd']
 
-def get_data(path, text_field, label_field):
+
+def get_index_to_embeddings_mapping(vocab, word_vecs):
+    """
+    get word embeddings matrix
+    :param vocab:
+    :param word_vecs:
+    :return:
+    """
+    embeddings = {}
+    for word in vocab.keys():
+        try:
+            embeddings[word] = word_vecs[word]
+        except KeyError:
+            # map index to small random vector
+            # print "No embedding for word '"  + word + "'"
+            #words_not_found.append(word)
+            embeddings[word] = np.random.uniform(-0.25, 0.25, 300)
+    return embeddings
+
+
+def get_data(text_field, label_field, domain):
     TEXT = text_field
     LABELS = label_field
+    d_review_dir = 'leave_out_' + domain + '/'
     # train, val, test = data.TabularDataset.splits(path, train='train.tsv',
     #                                               validation='val.tsv', test='test.tsv', format='tsv',
     #                                               fields=[('text', TEXT), ('label', LABELS)])
@@ -53,16 +75,16 @@ def get_data(path, text_field, label_field):
     #val = amazon_reader(TEXT, LABELS, path=path, file_n='val.tsv').examples
     #test = amazon_reader(TEXT, LABELS, path=path, file_n='test.tsv').examples
     train = data.TabularDataset(
-        path=review_dir + 'leave_out_books/train.tsv', format='tsv', skip_header=True,
+        path= review_dir + d_review_dir + 'train.tsv', format='tsv', skip_header=True,
         fields=[('text', TEXT),
                 ('labels', LABELS)])
     val = data.TabularDataset(
-        path=review_dir + 'leave_out_books/val.tsv', format='tsv', skip_header=True,
+        path= review_dir + d_review_dir + 'val.tsv', format='tsv', skip_header=True,
         fields=[('text', TEXT),
                 ('labels', LABELS)])
     print val.size
     test = data.TabularDataset(
-        path=review_dir + 'leave_out_books/test.tsv', format='tsv', skip_header=True,
+        path= review_dir + d_review_dir + 'test.tsv', format='tsv', skip_header=True,
         fields=[('text', TEXT),
                 ('labels', LABELS)])
     TEXT.build_vocab(train, val)
@@ -77,19 +99,12 @@ def get_data(path, text_field, label_field):
 
 
 # load data
-print("\nLoading data...")
-text_field = data.Field(lower=True)
-label_field = data.Field(sequential=False)
-train_iter, dev_iter, test_iter, vocab = get_data('/home/deep/cnn-text-classification-pytorch/reviews/leave_out_kitchen/', text_field, label_field)
-
-print vocab.freqs
 #print vocab.itos[18]
 # train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
 
 # update args and print
-args.embed_num = len(text_field.vocab)
-args.class_num = len(label_field.vocab) - 1
+
 args.cuda = (not args.no_cuda) and torch.cuda.is_available(); del args.no_cuda
 args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
 args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -110,8 +125,7 @@ if args.cuda:
     torch.cuda.set_device(args.device)
     cnn = cnn.cuda()
 """
-lstm = LSTMmodel.LSTMClassifier(len(vocab), args.embed_dim, args.lstm_hidden, args.class_num, args.batch_size, args.cuda)
-
+lstm = None
 # train or predict
 if args.predict is not None:
     label = train.predict(args.predict, lstm, text_field, label_field, args.cuda)
@@ -124,8 +138,20 @@ elif args.test:
 else:
     print()
     try:
-        train.train(train_iter, dev_iter, vocab, lstm, args)
-        train.eval(test_iter, lstm, args)
+        for domain in domains:
+            print("\nLoading data for domain..." + domain)
+            text_field = data.Field(lower=True)
+            label_field = data.Field(sequential=False)
+            train_iter, dev_iter, test_iter, vocab = get_data(
+                '/home/deep/cnn-text-classification-pytorch/reviews/leave_out_kitchen/', text_field, label_field)
+            args.embed_num = len(text_field.vocab)
+            args.class_num = len(label_field.vocab) - 1
+            corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
+            index_to_vector_map = get_index_to_embeddings_mapping(vocab.itos, corpus_wordvec)
+            lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
+                                            batch_size=args.batch_size, use_gpu=args.cuda)
+            train.train(train_iter, dev_iter, vocab, lstm, args)
+            train.eval(test_iter, lstm, args)
     except KeyboardInterrupt:
         print('\n' + '-' * 89)
         print('Exiting from training early')

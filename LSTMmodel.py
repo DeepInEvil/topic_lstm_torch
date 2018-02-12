@@ -9,14 +9,15 @@ import numpy as np
 
 class LSTMClassifier(nn.Module):
 
-    def __init__(self, vocab_size, embedding_dim, hidden_dim, label_size, batch_size, use_gpu):
+    def __init__(self, vocab_size, embedding_dim, emb_weights, hidden_dim, label_size, batch_size, use_gpu):
         super(LSTMClassifier, self).__init__()
         self.hidden_dim = hidden_dim
         self.batch_size = batch_size
         self.use_gpu = use_gpu
         self.embedding_dim = embedding_dim
         self.word_embeddings = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim)
-        self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_dim, dropout=0.2, batch_first=False)
+        self.word_embeddings.weight = emb_weights
+        self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_dim, dropout=0.3, batch_first=False)
         self.hidden2label = nn.Linear(hidden_dim, label_size)
 
     def init_hidden(self):
