@@ -52,6 +52,7 @@ def get_index_to_embeddings_mapping(vocab, word_vecs):
     :param word_vecs:
     :return:
     """
+    sd = 1 / np.sqrt(args.embed_dim)
     embeddings = np.random.normal(0, scale=sd, size=[len(vocab), args.embed_dim])
     embeddings = embeddings.astype(np.float32)
     for word in vocab.stoi.keys():
