@@ -112,8 +112,8 @@ def get_data(text_field, label_field, domain):
     #                            (train, val, test), device = -1,
     #                            batch_sizes=(args.batch_size, len(val), len(test)))
     train_iter = get_iterator(dataset=train, batch_size=args.batch_size, shuffle=True)
-    dev_iter = None
-    test_iter = None
+    dev_iter = get_iterator(dataset=val, batch_size=len(val), shuffle=False)
+    test_iter = get_iterator(dataset=test, batch_size=len(test), shuffle=False)
     return train_iter, dev_iter, test_iter, train_vocab
 
 
