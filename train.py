@@ -46,7 +46,6 @@ def train(train_iter, dev_iter, vocab, model, args):
             optimizer.step()
 
             steps += 1
-            print iter
             if iter % args.log_interval == 0:
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = 100.0 * corrects/traindata.batch_size
@@ -69,6 +68,7 @@ def train(train_iter, dev_iter, vocab, model, args):
                         print('early stop by {} steps.'.format(args.early_stop))
             elif steps % args.save_interval == 0:
                 saved_path = save(model, args.save_dir, 'snapshot', steps)
+    print saved_path
     return saved_path
 
 
@@ -99,8 +99,8 @@ def eval(data_iter, model, args):
     return accuracy
 
 
-def eval_test(data_iter, path, model, args):
-    model.load_state_dict(path)
+def eval_test(data_iter, model, path, args):
+    model.load_state_dict(torch.load(path))
     model.eval()
     corrects, avg_loss = 0, 0
     for batch in data_iter:
@@ -147,5 +147,6 @@ def save(model, save_dir, save_prefix, steps):
         os.makedirs(save_dir)
     save_prefix = os.path.join(save_dir, save_prefix)
     save_path = '{}_steps_{}.pt'.format(save_prefix, steps)
+    print save_path
     torch.save(model.state_dict(), save_path)
     return save_path

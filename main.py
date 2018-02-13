@@ -13,14 +13,14 @@ from torch.utils.data import DataLoader
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
-parser.add_argument('-lr', type=float, default=0.0001, help='initial learning rate [default: 0.0001]')
+parser.add_argument('-lr', type=float, default=0.001, help='initial learning rate [default: 0.0001]')
 parser.add_argument('-epochs', type=int, default=100, help='number of epochs for train [default: 256]')
 parser.add_argument('-batch-size', type=int, default=64, help='batch size for training [default: 64]')
 parser.add_argument('-log-interval',  type=int, default=100,   help='how many steps to wait before logging training status [default: 1]')
 parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
 parser.add_argument('-save-interval', type=int, default=100, help='how many steps to wait before saving [default:500]')
 parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
-parser.add_argument('-early-stop', type=int, default=7, help='iteration numbers to stop without performance increasing')
+parser.add_argument('-early-stop', type=int, default=100, help='iteration numbers to stop without performance increasing')
 parser.add_argument('-save-best', type=bool, default=True, help='whether to save when get best performance')
 # data 
 parser.add_argument('-shuffle', action='store_true', default=False, help='shuffle the data every epoch')
@@ -113,7 +113,7 @@ def get_data(text_field, label_field, domain):
     #                            batch_sizes=(args.batch_size, len(val), len(test)))
     train_iter = get_iterator(dataset=train, batch_size=args.batch_size, shuffle=True)
     dev_iter = get_iterator(dataset=val, batch_size=len(val), shuffle=False)
-    test_iter = get_iterator(dataset=test, batch_size=len(test), shuffle=False)
+    test_iter = get_iterator(dataset=test, batch_size=args.batch_size, shuffle=False)
     return train_iter, dev_iter, test_iter, train_vocab
 
 
@@ -163,7 +163,7 @@ else:
             label_field = data.Field(sequential=False)
             train_iter, dev_iter, test_iter, vocab = get_data(
                 text_field, label_field, domain)
-            print vocab.stoi['you']
+            print len(vocab)
             args.embed_num = len(text_field.vocab)
             args.class_num = len(label_field.vocab) - 1
             corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
@@ -172,7 +172,6 @@ else:
             lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
                                             batch_size=args.batch_size, use_gpu=args.cuda)
             out_file = train.train(train_iter, dev_iter, vocab, lstm, args)
-            del(train_iter)
             torch.cuda.empty_cache()
             train.eval_test(test_iter, lstm, out_file, args)
     except KeyboardInterrupt:

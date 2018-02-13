@@ -16,11 +16,12 @@ class LSTMClassifier(nn.Module):
         self.use_gpu = use_gpu
         self.embedding_dim = embedding_dim
         self.word_embeddings = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim)
-        #self.word_embeddings.weight.data = torch.Tensor(emb_weights)
+        self.word_embeddings.weight.data = torch.Tensor(emb_weights)
         self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_dim, dropout=0.3, batch_first=False)
         self.dropout = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(hidden_dim, 500)
-        self.fc2 = nn.Linear(500, label_size)
+        self.fc1 = nn.Linear(hidden_dim, 100)
+        self.fc2 = nn.Linear(100, label_size)
+        self.init_weights()
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
@@ -31,13 +32,21 @@ class LSTMClassifier(nn.Module):
             c0 = Variable(torch.zeros(1, batch_size, self.hidden_dim))
         return (h0, c0)
 
+    def init_weights(self):
+
+        #self.embed.weight = nn.Parameter(self.embedding_weight)
+        init.xavier_uniform(self.fc1.weight, gain=np.sqrt(2))
+        init.xavier_uniform(self.fc2.weight, gain=np.sqrt(2))
+        #self.fc1.bias.data.normal_(0, 0.01)
+        #self.fc1.weight.data.(0, 0.01)
+
     def forward(self, sentence):
         self.hidden = self.init_hidden(sentence.size(0))
         x = self.word_embeddings(sentence)
         x = x.view(x.size(1), x.size(0), self.embedding_dim)
         lstm_out, self.hidden = self.lstm(x, self.hidden)
         lstm_out = lstm_out[-1]
-        lstm_out = self.fc1(lstm_out)
+        lstm_out = F.tanh(self.fc1(lstm_out))
         out_hidden = self.dropout(lstm_out)
         logits = self.fc2(out_hidden)
         return logits
