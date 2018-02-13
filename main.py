@@ -40,9 +40,9 @@ parser.add_argument('-snapshot', type=str, default=None, help='filename of model
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 args = parser.parse_args()
-review_dir = '/data/dchaudhu/topic_lstm_torch/reviews/'
+review_dir = '/home/deep/cnn-text-classification-pytorch/topic_lstm_torch/reviews/'
 lda_model = '/data/dchaudhu/topic_lstm_torch/lda_models/amazon_lda'
-word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
+#word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
 domains = ['electronics', 'books', 'kitchen', 'dvd']
 
 
@@ -65,6 +65,16 @@ def get_index_to_embeddings_mapping(vocab, word_vecs):
             #words_not_found.append(word)
             embeddings[vocab.stoi[word]] = np.random.uniform(-0.25, 0.25, 300)
     return embeddings
+
+
+def get_iterator(dataset, batch_size, train=True,
+    shuffle=True, repeat=False):
+    dataset_iter = data.Iterator(
+        dataset, batch_size=batch_size, device=0,
+        train=train, shuffle=shuffle, repeat=repeat,
+        sort=False
+    )
+    return dataset_iter
 
 
 def get_data(text_field, label_field, domain):
@@ -92,11 +102,18 @@ def get_data(text_field, label_field, domain):
                 ('labels', LABELS)])
     TEXT.build_vocab(train, val)
     LABELS.build_vocab(train, val)
+    print (train[0])
     train_vocab = TEXT.vocab
     print len(val), len(test)
-    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
-                                (train, val, test), device = -1,
-                                batch_sizes=(args.batch_size, len(val), len(test)))
+    print type(train)
+    #train = torch.utils.data.TensorDataset(train.text, train.labels)
+
+    #train_iter, dev_iter, test_iter = data.Iterator.splits(
+    #                            (train, val, test), device = -1,
+    #                            batch_sizes=(args.batch_size, len(val), len(test)))
+    train_iter = get_iterator(dataset=train, batch_size=args.batch_size, shuffle=True)
+    dev_iter = None
+    test_iter = None
     return train_iter, dev_iter, test_iter, train_vocab
 
 
@@ -149,8 +166,9 @@ else:
             print vocab.stoi['you']
             args.embed_num = len(text_field.vocab)
             args.class_num = len(label_field.vocab) - 1
-            corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
-            index_to_vector_map = (get_index_to_embeddings_mapping(vocab, corpus_wordvec))
+            #corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
+            #index_to_vector_map = (get_index_to_embeddings_mapping(vocab, corpus_wordvec))
+            index_to_vector_map = None
             lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
                                             batch_size=args.batch_size, use_gpu=args.cuda)
             train.train(train_iter, dev_iter, vocab, lstm, args)

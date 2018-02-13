@@ -22,11 +22,13 @@ def train(train_iter, dev_iter, vocab, model, args):
     best_acc = 0
     last_step = 0
     model.train()
+    print len(train_iter)
     for epoch in range(1, args.epochs+1):
         print epoch
         for iter, traindata in enumerate(train_iter):
+            #print train_iter[iter]
             feature, target = traindata.text, traindata.labels
-            print target
+            #print target
             feature.data.t_(), target.data.sub_(1)  # batch first, index align
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
@@ -44,6 +46,8 @@ def train(train_iter, dev_iter, vocab, model, args):
             optimizer.step()
 
             steps += 1
+            print iter
+            continue
             if iter % args.log_interval == 0:
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = 100.0 * corrects/traindata.batch_size
@@ -53,6 +57,7 @@ def train(train_iter, dev_iter, vocab, model, args):
                                                                              accuracy,
                                                                              corrects,
                                                                         traindata.batch_size))
+
             if steps % args.test_interval == 0:
                 dev_acc = eval(dev_iter, model, args)
                 if dev_acc > best_acc:

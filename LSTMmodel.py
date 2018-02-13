@@ -16,7 +16,7 @@ class LSTMClassifier(nn.Module):
         self.use_gpu = use_gpu
         self.embedding_dim = embedding_dim
         self.word_embeddings = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim)
-        self.word_embeddings.weight.data = torch.Tensor(emb_weights)
+        #self.word_embeddings.weight.data = torch.Tensor(emb_weights)
         self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_dim, dropout=0.3, batch_first=False)
         self.dropout = nn.Dropout(0.5)
         self.fc1 = nn.Linear(hidden_dim, 500)
