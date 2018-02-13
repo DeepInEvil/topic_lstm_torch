@@ -63,7 +63,7 @@ def train(train_iter, dev_iter, vocab, model, args):
                     best_acc = dev_acc
                     last_step = steps
                     if args.save_best:
-                        saved_pathsave(model, args.save_dir, 'best', steps)
+                        saved_path = save(model, args.save_dir, 'best', steps)
                 else:
                     if steps - last_step >= args.early_stop:
                         print('early stop by {} steps.'.format(args.early_stop))
