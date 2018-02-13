@@ -23,8 +23,9 @@ def train(train_iter, dev_iter, vocab, model, args):
     last_step = 0
     model.train()
     for epoch in range(1, args.epochs+1):
+        print epoch
         for iter, traindata in enumerate(train_iter):
-            feature, target = traindata
+            feature, target = traindata.text, traindata.labels
             print target
             feature.data.t_(), target.data.sub_(1)  # batch first, index align
             if args.cuda:
