@@ -94,21 +94,9 @@ def get_data(text_field, label_field, domain):
     LABELS.build_vocab(train, val)
     train_vocab = TEXT.vocab
     print len(val), len(test)
-    train_iter = DataLoader(train,
-                          batch_size=args.batch_size,
-                          shuffle=True,
-                          num_workers=10
-                         )
-    dev_iter = DataLoader(train,
-                          batch_size=len(val),
-                          shuffle=False,
-                          num_workers=4
-                         )
-    test_iter = DataLoader(test,
-               batch_size=len(test),
-               shuffle=False,
-               num_workers=4
-               )
+    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
+                                (train, val, test), device = -1,
+                                batch_sizes=(args.batch_size, len(val), len(test)))
     return train_iter, dev_iter, test_iter, train_vocab
 
 
