@@ -73,9 +73,9 @@ def eval(data_iter, model, args):
         feature.data.t_(), target.data.sub_(1)  # batch first, index align
         if args.cuda:
             feature, target = feature.cuda(), target.cuda()
-        topic_vec = torch.autograd.Variable(torch.from_numpy(np.random.rand(feature.size(0), 50)))
-        topic_vec = topic_vec.type(torch.FloatTensor)
-        logit = model(feature, topic_vec)
+        #topic_vec = torch.autograd.Variable(torch.from_numpy(np.random.rand(feature.size(0), 50)))
+        #topic_vec = topic_vec.type(torch.FloatTensor)
+        logit = model(feature)
         loss = F.cross_entropy(logit, target, size_average=False)
 
         avg_loss += loss.data[0]
