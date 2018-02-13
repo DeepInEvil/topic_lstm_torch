@@ -47,7 +47,6 @@ def train(train_iter, dev_iter, vocab, model, args):
 
             steps += 1
             print iter
-            continue
             if iter % args.log_interval == 0:
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = 100.0 * corrects/traindata.batch_size
@@ -64,12 +63,13 @@ def train(train_iter, dev_iter, vocab, model, args):
                     best_acc = dev_acc
                     last_step = steps
                     if args.save_best:
-                        save(model, args.save_dir, 'best', steps)
+                        saved_pathsave(model, args.save_dir, 'best', steps)
                 else:
                     if steps - last_step >= args.early_stop:
                         print('early stop by {} steps.'.format(args.early_stop))
             elif steps % args.save_interval == 0:
-                save(model, args.save_dir, 'snapshot', steps)
+                saved_path = save(model, args.save_dir, 'snapshot', steps)
+    return saved_path
 
 
 def eval(data_iter, model, args):
@@ -99,6 +99,33 @@ def eval(data_iter, model, args):
     return accuracy
 
 
+def eval_test(data_iter, path, model, args):
+    model.load_state_dict(path)
+    model.eval()
+    corrects, avg_loss = 0, 0
+    for batch in data_iter:
+        feature, target = batch.text, batch.labels
+        feature.data.t_(), target.data.sub_(1)  # batch first, index align
+        if args.cuda:
+            feature, target = feature.cuda(), target.cuda()
+        #topic_vec = torch.autograd.Variable(torch.from_numpy(np.random.rand(feature.size(0), 50)))
+        #topic_vec = topic_vec.type(torch.FloatTensor)
+        logit = model(feature)
+        loss = F.cross_entropy(logit, target, size_average=False)
+
+        avg_loss += loss.data[0]
+        corrects += (torch .max(logit, 1)
+                     [1].view(target.size()).data == target.data).sum()
+
+    size = len(data_iter.dataset)
+    avg_loss /= size
+    accuracy = 100.0 * corrects/size
+    print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+                                                                       accuracy,
+                                                                       corrects,
+                                                                       size))
+    return accuracy
+
 def predict(text, model, text_field, label_feild, cuda_flag):
     assert isinstance(text, str)
     model.eval()
@@ -121,3 +148,4 @@ def save(model, save_dir, save_prefix, steps):
     save_prefix = os.path.join(save_dir, save_prefix)
     save_path = '{}_steps_{}.pt'.format(save_prefix, steps)
     torch.save(model.state_dict(), save_path)
+    return save_path

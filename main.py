@@ -42,7 +42,7 @@ parser.add_argument('-test', action='store_true', default=False, help='train or 
 args = parser.parse_args()
 review_dir = '/data/dchaudhu/topic_lstm_torch/reviews/'
 lda_model = '/data/dchaudhu/topic_lstm_torch/lda_models/amazon_lda'
-#word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
+word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
 domains = ['electronics', 'books', 'kitchen', 'dvd']
 
 
@@ -166,13 +166,15 @@ else:
             print vocab.stoi['you']
             args.embed_num = len(text_field.vocab)
             args.class_num = len(label_field.vocab) - 1
-            #corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
-            #index_to_vector_map = (get_index_to_embeddings_mapping(vocab, corpus_wordvec))
-            index_to_vector_map = None
+            corpus_wordvec = word2vec.Word2Vec.load(word_vec_file)
+            index_to_vector_map = (get_index_to_embeddings_mapping(vocab, corpus_wordvec))
+            #index_to_vector_map = None
             lstm = LSTMmodel.LSTMClassifier(vocab_size=len(vocab), embedding_dim=args.embed_dim, emb_weights=index_to_vector_map, hidden_dim=args.lstm_hidden, label_size=args.class_num,
                                             batch_size=args.batch_size, use_gpu=args.cuda)
-            train.train(train_iter, dev_iter, vocab, lstm, args)
-            train.eval(test_iter, lstm, args)
+            out_file = train.train(train_iter, dev_iter, vocab, lstm, args)
+            del(train_iter)
+            torch.cuda.empty_cache()
+            train.eval_test(test_iter, lstm, out_file, args)
     except KeyboardInterrupt:
         print('\n' + '-' * 89)
         print('Exiting from training early')
