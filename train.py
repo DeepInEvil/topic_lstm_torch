@@ -27,7 +27,6 @@ def train(train_iter, dev_iter, vocab, model, args):
             feature, target = batch.text, batch.labels
             feature.data.t_(), target.data.sub_(1)  # batch first, index align
             if args.cuda:
-                print "enabling cuda"
                 feature, target = feature.cuda(), target.cuda()
             #text_vals = get_topics(feature.data.numpy(), vocab)
             #print text_vals[0]
@@ -52,7 +51,6 @@ def train(train_iter, dev_iter, vocab, model, args):
                                                                              accuracy,
                                                                              corrects,
                                                                         batch.batch_size))
-                continue
             if steps % args.test_interval == 0:
                 dev_acc = eval(dev_iter, model, args)
                 if dev_acc > best_acc:
