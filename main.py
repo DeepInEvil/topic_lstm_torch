@@ -40,7 +40,7 @@ parser.add_argument('-snapshot', type=str, default=None, help='filename of model
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 args = parser.parse_args()
-review_dir = '/home/deep/cnn-text-classification-pytorch/topic_lstm_torch/reviews/'
+review_dir = '/data/dchaudhu/topic_lstm_torch/reviews/'
 lda_model = '/data/dchaudhu/topic_lstm_torch/lda_models/amazon_lda'
 #word_vec_file = '/data/dchaudhu/topic_lstm_torch/word_vectors/word2vec_amazon'
 domains = ['electronics', 'books', 'kitchen', 'dvd']
