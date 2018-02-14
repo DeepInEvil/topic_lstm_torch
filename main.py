@@ -159,7 +159,7 @@ else:
     try:
         for domain in domains:
             print("\nLoading data for domain..." + domain)
-            text_field = data.Field(lower=True)
+            text_field = data.Field(lower=True, fix_length=100)
             label_field = data.Field(sequential=False)
             train_iter, dev_iter, test_iter, vocab = get_data(
                 text_field, label_field, domain)
