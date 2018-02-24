@@ -16,6 +16,7 @@ from dataloader import TextClassDataLoader
 from model import RNN
 from util import AverageMeter, accuracy
 from util import adjust_learning_rate
+from sklearn.metrics import accuracy_score
 
 np.random.seed(0)
 torch.manual_seed(0)
@@ -32,7 +33,7 @@ parser.add_argument('--hidden-size', default=32, type=int, metavar='N', help='rn
 parser.add_argument('--layers', default=2, type=int, metavar='N', help='number of rnn layers')
 parser.add_argument('--classes', default=8, type=int, metavar='N', help='number of output classes')
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
-parser.add_argument('--cuda', default=False, action='store_true', help='use cuda')
+parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
 args = parser.parse_args()
 
 # create vocab
@@ -104,7 +105,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss
-        prec1 = accuracy(output.data, target, topk=(1,))
+        prec1 = accuracy_score(output.data, target)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
@@ -151,7 +152,7 @@ def test(val_loader, model, criterion):
         loss = criterion(output, target_var)
         print (loss)
         # measure accuracy and record loss
-        prec1 = accuracy(output.data, target, topk=(1,))
+        prec1 = accuracy_score(output.data, target)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
