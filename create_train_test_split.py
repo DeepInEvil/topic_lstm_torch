@@ -56,14 +56,14 @@ def write_train_val(datasets, training_f, val_f):
     print len(train_x), len(val_x)
     train_dat = pd.DataFrame(train_x, columns=['review'])
     train_dat['labels'] = train_y
-    train_dat.to_csv(training_f, index=False, sep='\t')
+    train_dat.to_csv(training_f, index=False)
     #for i, review in enumerate(train_x):
     #    training_f.write(review.encode('utf-8') + '\t' + train_y[i] + '\n')
     training_f.close()
     #rint training_f
     val_dat = pd.DataFrame(val_x, columns=['review'])
     val_dat['labels'] = val_y
-    val_dat.to_csv(val_f, index=False, sep='\t')
+    val_dat.to_csv(val_f, index=False)
 
 
 def write_reviews(datasets, test_f):
@@ -71,7 +71,7 @@ def write_reviews(datasets, test_f):
     test_x, test_y = datasets
     test_dat = pd.DataFrame(test_x, columns=['review'])
     test_dat['labels'] = test_y
-    test_dat.to_csv(test_f, index=False, sep='\t')
+    test_dat.to_csv(test_f, index=False)
 
 
 def append_labels(out_list, dataset):
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         for dom in train_domains:
             review, label = read_dataset(dom)
 
-            train_x, val_x, train_y, val_y = train_test_split(review, label, stratify=label, test_size=0.2,
+            train_x, val_x, train_y, val_y = train_test_split(review, label, stratify=label, test_size=0.167,
                                                           random_state=666)
             print len(train_x), len(val_x)
             tr_x, vl_x, tr_y, vl_y = append_labels(tr_x, train_x), append_labels(vl_x, val_x), append_labels(tr_y, train_y), \
@@ -108,10 +108,10 @@ if __name__ == '__main__':
 
         out_dat = tr_x, vl_x, tr_y, vl_y
         print len(tr_y), len(vl_x)
-        write_train_val(out_dat, root_dir + out_dir + '/' + 'train.tsv', root_dir + out_dir + '/' + 'val.tsv')
+        write_train_val(out_dat, root_dir + out_dir + '/' + 'train.csv', root_dir + out_dir + '/' + 'val.csv')
 
         test_dat= read_dataset(test_domain)
-        write_reviews(test_dat, root_dir + out_dir + '/' + 'test.tsv')
+        write_reviews(test_dat, root_dir + out_dir + '/' + 'test.csv')
 
     #write_train_val(out_dat, '/home/deep/cnn-text-classification-pytorch/reviews/training_samples/train.tsv'
     #                , '/home/deep/cnn-text-classification-pytorch/reviews/training_samples/val.tsv')
