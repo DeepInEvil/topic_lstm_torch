@@ -3,21 +3,15 @@ import csv
 # import nltk
 
 LABEL_TO_INDEX = {
-    'business':                  0,
-    'computers':                 1,
-    'culture-arts-entertainment':2,
-    'education-science':         3,
-    'engineering':               4,
-    'health':                    5,
-    'politics-society':          6,
-    'sports':                    7
+    'negative':                  0,
+    'positive':                 1,
 }
 
 def create_tsv_file(path_in, path_out):
 
     with open(path_in,'r') as f, open(path_out,'w') as fw:
         writer = csv.writer(fw, delimiter='\t')
-        writer.writerow(['label','body'])
+        writer.writerow(['label', 'body'])
         for line in f:
             tokens = [x.lower() for x in line.split()]
             label = LABEL_TO_INDEX[tokens[-1]]
