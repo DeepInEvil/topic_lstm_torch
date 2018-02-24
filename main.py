@@ -103,10 +103,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # compute output
         output = model(input_var, seq_lengths)
         loss = criterion(output, target_var)
-
+        print(output)
         # measure accuracy and record loss
-        correct += (output.data == target).sum()
-        prec1 = 100 * correct / len(target)
+        correct += (output.data == target_var).sum()
+        prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
@@ -151,10 +151,10 @@ def test(val_loader, model, criterion):
         # compute output
         output = model(input_var,seq_lengths)
         loss = criterion(output, target_var)
-        print (loss)
+
         # measure accuracy and record loss
-        correct += (output.data == target).sum()
-        prec1 = 100 * correct / len(target)
+        correct += (output.data == target_var).sum()
+        prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
