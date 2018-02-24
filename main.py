@@ -52,8 +52,8 @@ print('===> vocab creating: {t:.3f}'.format(t=time.time()-end))
 # create trainer
 print("===> creating dataloaders ...")
 end = time.time()
-train_loader = TextClassDataLoader('/home/deep/cnn-text-classification-pytorch/reviews/leave_out_books/train.csv', d_word_index, batch_size=args.batch_size)
-val_loader = TextClassDataLoader('/home/deep/cnn-text-classification-pytorch/reviews/leave_out_books/test.csv', d_word_index, batch_size=args.batch_size)
+train_loader = TextClassDataLoader('reviews/leave_out_books/train.csv', d_word_index, batch_size=args.batch_size)
+val_loader = TextClassDataLoader('reviews/leave_out_books/test.csv', d_word_index, batch_size=args.batch_size)
 print('===> dataloader creatin: {t:.3f}'.format(t=time.time()-end))
 
 
