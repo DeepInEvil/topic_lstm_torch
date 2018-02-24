@@ -87,7 +87,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     # switch to train mode
     model.train()
-
+    correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(train_loader):
         # measure data loading time
@@ -105,7 +105,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss
-        prec1 = accuracy_score(output.data, target)
+        correct += (output.data == target).sum()
+        prec1 = 100 * correct / len(target)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
@@ -136,7 +137,7 @@ def test(val_loader, model, criterion):
 
     # switch to evaluate mode
     model.eval()
-
+    correct = 0.0
     end = time.time()
     for i, (input, target,seq_lengths) in enumerate(val_loader):
 
@@ -152,7 +153,8 @@ def test(val_loader, model, criterion):
         loss = criterion(output, target_var)
         print (loss)
         # measure accuracy and record loss
-        prec1 = accuracy_score(output.data, target)
+        correct += (output.data == target).sum()
+        prec1 = 100 * correct / len(target)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0][0], input.size(0))
 
