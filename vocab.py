@@ -24,9 +24,9 @@ class VocabBuilder():
 
         word_count = defaultdict(int)
 
-        df = pd.read_csv(path_file,delimiter='\t')
-        df['body'] = df['body'].apply(ut._tokenize)
-        samples = df['body'].values.tolist()
+        df = pd.read_csv(path_file,delimiter=',')
+        df['review'] = df['review'].apply(ut._tokenize)
+        samples = df['review'].values.tolist()
 
         for sample in samples:
             for tkn in sample:

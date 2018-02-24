@@ -38,7 +38,7 @@ args = parser.parse_args()
 # create vocab
 print("===> creating vocabs ...")
 end = time.time()
-v_builder = VocabBuilder(path_file='data/train.tsv', min_sample=args.min_samples)
+v_builder = VocabBuilder(path_file='reviews/leave_out_books/train.csv', min_sample=args.min_samples)
 d_word_index = v_builder.get_word_index()
 vocab_size = len(d_word_index)
 
