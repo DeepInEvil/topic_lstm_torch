@@ -31,7 +31,7 @@ parser.add_argument('--save-freq', '-sf', default=10, type=int, metavar='N', hel
 parser.add_argument('--embedding-size', default=256, type=int, metavar='N', help='embedding size')
 parser.add_argument('--hidden-size', default=32, type=int, metavar='N', help='rnn hidden size')
 parser.add_argument('--layers', default=2, type=int, metavar='N', help='number of rnn layers')
-parser.add_argument('--classes', default=8, type=int, metavar='N', help='number of output classes')
+parser.add_argument('--classes', default=2, type=int, metavar='N', help='number of output classes')
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
 args = parser.parse_args()
