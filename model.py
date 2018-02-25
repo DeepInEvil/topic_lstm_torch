@@ -46,6 +46,7 @@ class RNN(nn.Module):
 
         self.bn2 = nn.BatchNorm1d(hidden_size)
         self.fc = nn.Linear(hidden_size, num_output)
+        self.hx, self.cx = self.init_hidden(128)
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
@@ -72,15 +73,13 @@ class RNN(nn.Module):
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
-        hx, cx = self.init_hidden(x.size(0))
-
         yhat = []
         for j in range(x_embed.size(0)):
             input_t = x_embed[j]
             #print input_t.size()
-            hx, cx = self.rnncell(input_t, (hx, cx))
+            self.hx, self.cx = self.rnncell(input_t, (self.hx, self.cx))
             # print hx.size()
-            yhat.append(hx)
+            yhat.append(self.hx)
         #ht, ct = self.rnn(x_embed, self.hidden)
         #print ht.size()
         # use mean of outputs
