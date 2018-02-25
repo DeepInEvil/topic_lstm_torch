@@ -28,6 +28,8 @@ class RNN(nn.Module):
         self.batch_first = batch_first
         self.drop_en = nn.Dropout(p=0.8)
         self.use_gpu = use_gpu
+        self.hidden_dim = hidden_size
+
         # rnn module
         self.rnn = nn.LSTM(
             input_size=embed_size,
@@ -45,13 +47,13 @@ class RNN(nn.Module):
         self.bn2 = nn.BatchNorm1d(hidden_size)
         self.fc = nn.Linear(hidden_size, num_output)
 
-    def init_hidden(self):
+    def init_hidden(self, batch_size):
         if self.use_gpu:
-            h0 = Variable(torch.zeros(1, self.batch_size, self.hidden_dim).cuda())
-            c0 = Variable(torch.zeros(1, self.batch_size, self.hidden_dim).cuda())
+            h0 = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
+            c0 = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
         else:
-            h0 = Variable(torch.zeros(1, self.batch_size, self.hidden_dim))
-            c0 = Variable(torch.zeros(1, self.batch_size, self.hidden_dim))
+            h0 = Variable(torch.zeros(1, batch_size, self.hidden_dim))
+            c0 = Variable(torch.zeros(1, batch_size, self.hidden_dim))
         return (h0, c0)
 
     def forward(self, x, seq_lengths):
@@ -62,14 +64,15 @@ class RNN(nn.Module):
 
         x_embed = self.encoder(x)
         x_embed = self.drop_en(x_embed)
+        print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
 
-        self.hidden = self.init_hidden()
-        ht, ct = self.rnn(x, self.hidden)
+        self.hidden = self.init_hidden(x.size(0))
+        ht, ct = self.rnn(x_embed, self.hidden)
 
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
@@ -134,10 +137,10 @@ class RNN_topic(nn.Module):
 
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
-        packed_output, (ht, ct) = self.rnn(packed_input, None)
+        #packed_output, (ht, ct) = self.rnn(packed_input, None)
 
         # use mean of outputs
-        out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
+        #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
         row_indices = torch.arange(0, x.size(0)).long()
         col_indices = seq_lengths - 1
