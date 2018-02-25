@@ -257,7 +257,7 @@ def run_model(domain):
     print("===> creating rnn model ...")
     model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
                 num_output=args.classes, hidden_size=args.hidden_size,
-                num_layers=args.layers, batch_first=True, embeddings=embeddings)
+                num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
     print(model)
 
     # optimizer and loss
