@@ -303,3 +303,5 @@ if __name__ == '__main__':
     for domain in domains:
         domain_acc_dict[domain] = run_model(domain)
 
+    print ("Reporting final accuracies on testing set:")
+    print (domain_acc_dict)
