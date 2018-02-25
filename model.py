@@ -23,7 +23,7 @@ class RNN(nn.Module):
         self.encoder = nn.Embedding(vocab_size, embed_size, padding_idx=0)
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
-        self,batch_first = batch_first
+        self.batch_first = batch_first
         self.drop_en = nn.Dropout(p=0.8)
 
         # rnn module
