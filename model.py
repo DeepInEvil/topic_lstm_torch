@@ -73,7 +73,7 @@ class RNN(nn.Module):
 
         self.hidden = self.init_hidden(x.size(0))
         ht, ct = self.rnn(x_embed, self.hidden)
-
+        print ht.size()
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
@@ -133,7 +133,7 @@ class RNN_topic(nn.Module):
 
         x_embed = self.encoder(x)
         x_embed = self.drop_en(x_embed)
-        packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=True)
+        #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=True)
 
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
