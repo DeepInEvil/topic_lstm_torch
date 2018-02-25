@@ -90,7 +90,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(train_loader):
-        # measure data loading time
+
         data_time.update(time.time() - end)
 
         if args.cuda:
@@ -103,12 +103,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # compute output
         output = model(input_var, seq_lengths)
         loss = criterion(output, target_var)
-        print(output)
-        # measure accuracy and record loss
-        correct += (output.data == target_var).sum()
+        out = (torch.max(output, 1))[1]
+        #print (out)
+        # measoure accuracy and record loss
+        correct += (out.data.numpy() == target).sum()
         prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0][0], input.size(0))
+        top1.update(prec1, input.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -139,7 +140,7 @@ def test(val_loader, model, criterion):
     model.eval()
     correct = 0.0
     end = time.time()
-    for i, (input, target,seq_lengths) in enumerate(val_loader):
+    for i, (input, target, seq_lengths) in enumerate(val_loader):
 
         if args.cuda:
             input = input.cuda(async=True)
@@ -151,12 +152,12 @@ def test(val_loader, model, criterion):
         # compute output
         output = model(input_var,seq_lengths)
         loss = criterion(output, target_var)
-
+        out = (torch.max(output, 1))[1]
         # measure accuracy and record loss
-        correct += (output.data == target_var).sum()
+        correct += (out.data.numpy() == target).sum()
         prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0][0], input.size(0))
+        top1.update(prec1, input.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)
