@@ -38,6 +38,34 @@ parser.add_argument('--early-stopping', default=3, type=int, help='early stoppin
 args = parser.parse_args()
 domains = ['kitchen', 'electronics', 'dvd', 'books']
 
+
+def load_glove(path):
+    """
+    creates a dictionary mapping words to vectors from a file in glove format.
+    """
+    with open(path) as f:
+        glove = {}
+        for line in f.readlines():
+            values = line.split()
+            word = values[0]
+            vector = np.array(values[1:], dtype='float32')
+            glove[word] = vector
+        return glove
+
+
+def load_glove_embeddings(path, word2idx, embedding_dim=50):
+    with open(path) as f:
+        embeddings = np.zeros((len(word2idx), embedding_dim))
+        for line in f.readlines():
+            values = line.split()
+            word = values[0]
+            index = word2idx.get(word)
+            if index:
+                vector = np.array(values[1:], dtype='float32')
+                embeddings[index] = vector
+        return torch.from_numpy(embeddings).float()
+
+
 def earlystop(val_acc_list, current_val_acc):
     #print (current_val_acc, best_val_acc)
     if len(val_acc_list) > args.early_stopping:
@@ -210,7 +238,7 @@ def run_model(domain):
     v_builder = VocabBuilder(path_file=domain_d + '/train.csv', min_sample=args.min_samples)
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
-
+    embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
         os.mkdir('gen_' + domain)
 
@@ -229,7 +257,7 @@ def run_model(domain):
     print("===> creating rnn model ...")
     model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
                 num_output=args.classes, hidden_size=args.hidden_size,
-                num_layers=args.layers, batch_first=True)
+                num_layers=args.layers, batch_first=True, embeddings=embeddings)
     print(model)
 
     # optimizer and loss
