@@ -294,11 +294,12 @@ def run_model(domain):
             path_save_model = os.path.join('gen_'+ domain + '/', name_model)
             joblib.dump(model.float(), path_save_model, compress=2)
     print ("Results on test set for leave-out-domain!" + domain)
-    test(test_loader, model, criterion)
+    test_acc = test(test_loader, model, criterion)
+    return test_acc
 
 if __name__ == '__main__':
-
+    domain_acc_dict = {}
     # training and testing
     for domain in domains:
-        run_model(domain)
+        domain_acc_dict[domain] = run_model(domain)
 
