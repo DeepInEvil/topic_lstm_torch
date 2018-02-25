@@ -35,7 +35,7 @@ class RNN(nn.Module):
         )
 
         self.bn2 = nn.BatchNorm1d(hidden_size)
-        self.fc = nn.Linear(hidden_size*2, num_output)
+        self.fc = nn.Linear(hidden_size, num_output)
 
     def forward(self, x, seq_lengths):
         '''
