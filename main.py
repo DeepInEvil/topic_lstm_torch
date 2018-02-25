@@ -84,10 +84,13 @@ if args.cuda:
 def earlystop(val_acc_list, current_val_acc):
     best_val_acc = np.max(val_acc_list[-args.early_stopping:])
     print (current_val_acc, best_val_acc)
-    if current_val_acc > best_val_acc:
-        return False
+    if len(val_acc_list) > args.early_stopping:
+        if current_val_acc > best_val_acc:
+            return False
+        else:
+            return True
     else:
-        return True
+        return False
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
