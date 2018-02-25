@@ -6,7 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 class RNN(nn.Module):
 
     def __init__(self, vocab_size, embed_size, num_output, hidden_size=64,
-                                          num_layers=1, batch_first=True):
+                                          num_layers=2, batch_first=True):
 
         '''
         :param vocab_size: vocab size
@@ -28,13 +28,13 @@ class RNN(nn.Module):
         self.rnn = nn.LSTM(
             input_size=embed_size,
             hidden_size=hidden_size,
-            num_layers=1,
+            num_layers=num_layers,
             dropout=0.5,
             batch_first=True,
             bidirectional=False
         )
 
-        self.bn2 = nn.BatchNorm1d(hidden_size*2)
+        self.bn2 = nn.BatchNorm1d(hidden_size)
         self.fc = nn.Linear(hidden_size*2, num_output)
 
     def forward(self, x, seq_lengths):
@@ -60,9 +60,9 @@ class RNN(nn.Module):
             row_indices = row_indices.cuda()
             col_indices = col_indices.cuda()
 
-        #last_tensor=out_rnn[row_indices, col_indices, :]
+        last_tensor=out_rnn[row_indices, col_indices, :]
         #fc_input = torch.mean(last_tensor, dim=1)
-        last_tensor = ht[-1]
+        #last_tensor = ht[-1]
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         return out

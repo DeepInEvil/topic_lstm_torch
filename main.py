@@ -22,15 +22,15 @@ np.random.seed(0)
 torch.manual_seed(0)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
-parser.add_argument('-b', '--batch-size', default=256, type=int, metavar='N', help='mini-batch size')
+parser.add_argument('--epochs', default=50*2, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('-b', '--batch-size', default=128, type=int, metavar='N', help='mini-batch size')
 parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
 parser.add_argument('--save-freq', '-sf', default=10, type=int, metavar='N', help='model save frequency(epoch)')
 parser.add_argument('--embedding-size', default=256, type=int, metavar='N', help='embedding size')
-parser.add_argument('--hidden-size', default=32, type=int, metavar='N', help='rnn hidden size')
-parser.add_argument('--layers', default=2, type=int, metavar='N', help='number of rnn layers')
+parser.add_argument('--hidden-size', default=64, type=int, metavar='N', help='rnn hidden size')
+parser.add_argument('--layers', default=1, type=int, metavar='N', help='number of rnn layers')
 parser.add_argument('--classes', default=2, type=int, metavar='N', help='number of output classes')
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
@@ -90,7 +90,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(train_loader):
-        print (input, target)
+        #print (input, target)
         data_time.update(time.time() - end)
 
         if args.cuda:
