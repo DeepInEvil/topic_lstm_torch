@@ -73,7 +73,7 @@ class RNN(nn.Module):
 
         self.hidden = self.init_hidden(x.size(0))
         ht, ct = self.rnn(x_embed, self.hidden)
-        print ht.size()
+        #print ht.size()
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
@@ -83,14 +83,15 @@ class RNN(nn.Module):
             row_indices = row_indices.cuda()
             col_indices = col_indices.cuda()
 
-        last_tensor= ht[row_indices, col_indices, :]
+        last_tensor = ht[row_indices, col_indices, :]
         #last_tensor = ht[-1]
-        print last_tensor.size()
+        #print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[:-1]
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         return out
+
 
 class RNN_topic(nn.Module):
 
