@@ -83,6 +83,7 @@ if args.cuda:
 
 def earlystop(val_acc_list, current_val_acc):
     best_val_acc = np.max(val_acc_list[-args.early_stopping:])
+    print (current_val_acc, best_val_acc)
     if current_val_acc > best_val_acc:
         return False
     else:
@@ -137,7 +138,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})  '
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})  '
                   'Loss {loss.val:.4f} ({loss.avg:.4f})  '
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
+                  'Accuracy {top1.val:.3f} ({top1.avg:.3f})'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses, top1=top1))
             gc.collect()
