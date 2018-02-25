@@ -85,7 +85,8 @@ def earlystop(val_acc_list, current_val_acc):
     #print (current_val_acc, best_val_acc)
     if len(val_acc_list) > args.early_stopping:
         best_val_acc = np.max(val_acc_list[-args.early_stopping:])
-        if current_val_acc < best_val_acc:
+        print (best_val_acc)
+        if current_val_acc > best_val_acc:
             return False
         else:
             return True
