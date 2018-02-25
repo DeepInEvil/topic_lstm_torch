@@ -97,6 +97,7 @@ class RNN(nn.Module):
         #last_tensor = ht[:-1]
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
+        print out.size()
         return out
 
 
