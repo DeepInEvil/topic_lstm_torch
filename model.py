@@ -85,6 +85,7 @@ class RNN(nn.Module):
 
         #last_tensor=out_rnn[row_indices, col_indices, :]
         last_tensor = ht[-1]
+        print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[-1]
         fc_input = self.bn2(last_tensor)
