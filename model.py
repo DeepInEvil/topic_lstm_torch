@@ -70,8 +70,8 @@ class RNN(nn.Module):
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
-
         hx, cx = self.init_hidden(x.size(0))
+
         yhat = []
         for j in range(x_embed.size(1)):
             input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
@@ -84,11 +84,11 @@ class RNN(nn.Module):
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
-        row_indices = torch.arange(0, x.size(0)).long()
-        col_indices = seq_lengths - 1
-        if next(self.parameters()).is_cuda:
-            row_indices = row_indices.cuda()
-            col_indices = col_indices.cuda()
+        #row_indices = torch.arange(0, x.size(0)).long()
+        #col_indices = seq_lengths - 1
+        #if next(self.parameters()).is_cuda:
+        #    row_indices = row_indices.cuda()
+        #    col_indices = col_indices.cuda()
 
         last_tensor = torch.squeeze(yhat[-1])
         #last_tensor = ht[-1]
