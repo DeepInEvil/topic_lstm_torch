@@ -76,7 +76,7 @@ class RNN(nn.Module):
         yhat = []
         for j in range(x_embed.size(1)):
             input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
-            print input_t.size()
+            #print input_t.size()
             hx, cx = self.rnncell(input_t, (hx, cx))
             # print hx.size()
             yhat.append(hx)
@@ -93,12 +93,12 @@ class RNN(nn.Module):
 
         last_tensor = yhat[-1]
         #last_tensor = ht[-1]
-        print last_tensor.size()
+        #print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[:-1]
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
-        print out.size()
+        #print out.size()
         return out
 
 
