@@ -36,50 +36,7 @@ parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
 parser.add_argument('--early-stopping', default=3, type=int, help='early stopping on validation set')
 args = parser.parse_args()
-
-# create vocab
-print("===> creating vocabs ...")
-end = time.time()
-v_builder = VocabBuilder(path_file='reviews/leave_out_books/train.csv', min_sample=args.min_samples)
-d_word_index = v_builder.get_word_index()
-vocab_size = len(d_word_index)
-
-if not os.path.exists('gen'):
-    os.mkdir('gen')
-
-joblib.dump(d_word_index, 'gen/d_word_index.pkl', compress=3)
-print('===> vocab creating: {t:.3f}'.format(t=time.time()-end))
-
-
-# create trainer
-print("===> creating dataloaders ...")
-end = time.time()
-train_loader = TextClassDataLoader('reviews/leave_out_books/train.csv', d_word_index, batch_size=args.batch_size)
-val_loader = TextClassDataLoader('reviews/leave_out_books/val.csv', d_word_index, batch_size=args.batch_size)
-test_loader = TextClassDataLoader('reviews/leave_out_books/test.csv', d_word_index, batch_size=args.batch_size)
-print('===> dataloader creatin: {t:.3f}'.format(t=time.time()-end))
-
-
-# create model
-print("===> creating rnn model ...")
-model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
-            num_output=args.classes, hidden_size=args.hidden_size,
-            num_layers=args.layers, batch_first=True)
-print(model)
-
-
-# optimizer and loss
-optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-criterion = nn.CrossEntropyLoss()
-print(optimizer)
-print(criterion)
-
-if args.cuda:
-    torch.backends.cudnn.enabled = True
-    cudnn.benchmark = True
-    model.cuda()
-    criterion = criterion.cuda()
-
+domains = ['kitchen', 'electronics', 'dvd', 'books']
 
 def earlystop(val_acc_list, current_val_acc):
     #print (current_val_acc, best_val_acc)
@@ -205,7 +162,7 @@ def test(test_loader, model, criterion):
     model.eval()
     correct = 0.0
     end = time.time()
-    for i, (input, target, seq_lengths) in enumerate(val_loader):
+    for i, (input, target, seq_lengths) in enumerate(test_loader):
 
         if args.cuda:
             input = input.cuda(async=True)
@@ -234,7 +191,7 @@ def test(test_loader, model, criterion):
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})  '
                   'Loss {loss.val:.4f} ({loss.avg:.4f})  '
                   'Accuracy {top1.val:.3f} ({top1.avg:.3f})'.format(
-                   i, len(val_loader), batch_time=batch_time, loss=losses,
+                   i, len(test_loader), batch_time=batch_time, loss=losses,
                    top1=top1))
             gc.collect()
 
@@ -244,11 +201,50 @@ def test(test_loader, model, criterion):
     return top1.avg
 
 
-if __name__ == '__main__':
-    val_acc = []
-    # training and testing
-    for epoch in range(1, args.epochs+1):
+def run_model(domain):
+    # create vocab
+    print("===> creating vocabs for domain..." + domain)
+    end = time.time()
+    domain_files = 'reviews/leave_out_' + domain
+    v_builder = VocabBuilder(path_file=domain_files + '/train.csv', min_sample=args.min_samples)
+    d_word_index = v_builder.get_word_index()
+    vocab_size = len(d_word_index)
 
+    if not os.path.exists('gen' + domain):
+        os.mkdir('gen' + domain)
+
+    joblib.dump(d_word_index, 'gen/d_word_index.pkl', compress=3)
+    print('===> vocab creating: {t:.3f}'.format(t=time.time() - end))
+
+    # create trainer
+    print("===> creating dataloaders ...")
+    end = time.time()
+    train_loader = TextClassDataLoader(domain_files + '/train.csv', d_word_index, batch_size=args.batch_size)
+    val_loader = TextClassDataLoader(domain_files +'/val.csv', d_word_index, batch_size=args.batch_size)
+    test_loader = TextClassDataLoader(domain_files + '/test.csv', d_word_index, batch_size=args.batch_size)
+    print('===> dataloader creatin: {t:.3f}'.format(t=time.time() - end))
+
+    # create model
+    print("===> creating rnn model ...")
+    model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
+                num_output=args.classes, hidden_size=args.hidden_size,
+                num_layers=args.layers, batch_first=True)
+    print(model)
+
+    # optimizer and loss
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    criterion = nn.CrossEntropyLoss()
+    print(optimizer)
+    print(criterion)
+
+    if args.cuda:
+        torch.backends.cudnn.enabled = True
+        cudnn.benchmark = True
+        model.cuda()
+        criterion = criterion.cuda()
+
+    for epoch in range(1, args.epochs+1):
+        val_acc = []
         adjust_learning_rate(args.lr, optimizer, epoch)
         train(train_loader, model, criterion, optimizer, epoch)
         print ("getting performance on validation set!")
@@ -266,5 +262,12 @@ if __name__ == '__main__':
             name_model = 'rnn_{}.pkl'.format(epoch)
             path_save_model = os.path.join('gen', name_model)
             joblib.dump(model.float(), path_save_model, compress=2)
-    print ("Results on test set!s")
+    print ("Results on test set!")
     test(test_loader, model, criterion)
+
+if __name__ == '__main__':
+
+    # training and testing
+    for domain in domains:
+        run_model(domain)
+
