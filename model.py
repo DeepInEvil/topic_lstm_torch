@@ -49,12 +49,13 @@ class RNN(nn.Module):
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
-            hx = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
-            cx = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim).cuda())
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim).cuda())
         else:
-            hx = Variable(torch.zeros(1, batch_size, self.hidden_dim))
-            cx = Variable(torch.zeros(1, batch_size, self.hidden_dim))
-        return (hx, cx)
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim))
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim))
+
+        return hx, cx
 
     def forward(self, x, seq_lengths):
         '''
@@ -74,7 +75,7 @@ class RNN(nn.Module):
 
         yhat = []
         for j in range(x_embed.size(1)):
-            input_t = x_embed[:, j: j + 1]
+            input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
             print input_t.size()
             hx, cx = self.rnncell(input_t, (hx, cx))
             # print hx.size()
@@ -90,7 +91,7 @@ class RNN(nn.Module):
         #    row_indices = row_indices.cuda()
         #    col_indices = col_indices.cuda()
 
-        last_tensor = torch.squeeze(yhat[-1])
+        last_tensor = yhat[-1]
         #last_tensor = ht[-1]
         print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
