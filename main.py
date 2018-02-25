@@ -34,6 +34,7 @@ parser.add_argument('--layers', default=1, type=int, metavar='N', help='number o
 parser.add_argument('--classes', default=2, type=int, metavar='N', help='number of output classes')
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
+parser.add_argument('--early-stopping', default=3, help='early stopping on validation set')
 args = parser.parse_args()
 
 # create vocab
@@ -54,7 +55,8 @@ print('===> vocab creating: {t:.3f}'.format(t=time.time()-end))
 print("===> creating dataloaders ...")
 end = time.time()
 train_loader = TextClassDataLoader('reviews/leave_out_books/train.csv', d_word_index, batch_size=args.batch_size)
-val_loader = TextClassDataLoader('reviews/leave_out_books/test.csv', d_word_index, batch_size=args.batch_size)
+val_loader = TextClassDataLoader('reviews/leave_out_books/valid.csv', d_word_index, batch_size=args.batch_size)
+test_loader = TextClassDataLoader('reviews/leave_out_books/test.csv', d_word_index, batch_size=args.batch_size)
 print('===> dataloader creatin: {t:.3f}'.format(t=time.time()-end))
 
 
@@ -77,6 +79,14 @@ if args.cuda:
     cudnn.benchmark = True
     model.cuda()
     criterion = criterion.cuda()
+
+
+def earlystop(val_acc_list, current_val_acc):
+    best_val_acc = np.max(val_acc_list[-args.early_stopping:])
+    if current_val_acc > best_val_acc:
+        return False
+    else:
+        return True
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
@@ -133,7 +143,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
             gc.collect()
 
 
-def test(val_loader, model, criterion):
+def validate(val_loader, model, criterion):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -152,7 +162,7 @@ def test(val_loader, model, criterion):
         target_var = torch.autograd.Variable(target, volatile=True)
 
         # compute output
-        output = model(input_var,seq_lengths)
+        output = model(input_var, seq_lengths)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -170,28 +180,83 @@ def test(val_loader, model, criterion):
             print('Test: [{0}/{1}]  '
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})  '
                   'Loss {loss.val:.4f} ({loss.avg:.4f})  '
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
+                  'Accuracy {top1.val:.3f} ({top1.avg:.3f})'.format(
                    i, len(val_loader), batch_time=batch_time, loss=losses,
                    top1=top1))
             gc.collect()
 
-    print(' * Prec@1 {top1.avg:.3f}'
+    print(' * Accuracy {top1.avg:.3f}'
           .format(top1=top1))
 
     return top1.avg
 
 
-# training and testing
-for epoch in range(1, args.epochs+1):
+def test(test_loader, model, criterion):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
 
-    adjust_learning_rate(args.lr, optimizer, epoch)
-    train(train_loader, model, criterion, optimizer, epoch)
-    print ("getting performance on test set!")
-    test(val_loader, model, criterion)
+    # switch to evaluate mode
+    model.eval()
+    correct = 0.0
+    end = time.time()
+    for i, (input, target, seq_lengths) in enumerate(val_loader):
 
-    # save current model
-    if epoch % args.save_freq == 0:
-        name_model = 'rnn_{}.pkl'.format(epoch)
-        path_save_model = os.path.join('gen', name_model)
-        joblib.dump(model.float(), path_save_model, compress=2)
+        if args.cuda:
+            input = input.cuda(async=True)
+            target = target.cuda(async=True)
 
+        input_var = torch.autograd.Variable(input, volatile=True)
+        target_var = torch.autograd.Variable(target, volatile=True)
+
+        # compute output
+        output = model(input_var, seq_lengths)
+        loss = criterion(output, target_var)
+        out = (torch.max(output, 1))[1].cpu()
+        # measure accuracy and record loss
+        #correct += (out.data.numpy() == target).sum()
+        #prec1 = 100 * correct / len(target_var)
+        prec1 = accuracy_score(target, out.data.numpy())
+        losses.update(loss.data[0], input.size(0))
+        top1.update(prec1, input.size(0))
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        if i!= 0 and i % args.print_freq == 0:
+            print('Test: [{0}/{1}]  '
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})  '
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})  '
+                  'Accuracy {top1.val:.3f} ({top1.avg:.3f})'.format(
+                   i, len(val_loader), batch_time=batch_time, loss=losses,
+                   top1=top1))
+            gc.collect()
+
+    print(' * Accuracy {top1.avg:.3f}'
+          .format(top1=top1))
+
+    return top1.avg
+
+
+if __name__ == '__main__':
+    val_acc = []
+    # training and testing
+    for epoch in range(1, args.epochs+1):
+
+        adjust_learning_rate(args.lr, optimizer, epoch)
+        train(train_loader, model, criterion, optimizer, epoch)
+        print ("getting performance on validation set!")
+        v_acc = validate(val_loader, model, criterion)
+        val_acc.append(v_acc)
+        if len(val_acc) > args.early_stopping:
+            if earlystop(val_acc, v_acc):
+                break
+
+        # save current model
+        if epoch % args.save_freq == 0:
+            name_model = 'rnn_{}.pkl'.format(epoch)
+            path_save_model = os.path.join('gen', name_model)
+            joblib.dump(model.float(), path_save_model, compress=2)
+    print ("Results on test set!s")
+    test(test_loader, model, criterion)
