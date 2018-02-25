@@ -205,24 +205,25 @@ def run_model(domain):
     # create vocab
     print("===> creating vocabs for domain..." + domain)
     end = time.time()
-    domain_files = 'reviews/leave_out_' + domain
-    v_builder = VocabBuilder(path_file=domain_files + '/train.csv', min_sample=args.min_samples)
+    domain_d = 'reviews/leave_out_' + domain
+    print (domain_d)
+    v_builder = VocabBuilder(path_file=domain_d + '/train.csv', min_sample=args.min_samples)
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
 
-    if not os.path.exists('gen' + domain):
-        os.mkdir('gen' + domain)
+    if not os.path.exists('gen_' + domain):
+        os.mkdir('gen_' + domain)
 
-    joblib.dump(d_word_index, 'gen/d_word_index.pkl', compress=3)
+    joblib.dump(d_word_index, 'gen_' + domain +'/d_word_index.pkl', compress=3)
     print('===> vocab creating: {t:.3f}'.format(t=time.time() - end))
 
     # create trainer
     print("===> creating dataloaders ...")
     end = time.time()
-    train_loader = TextClassDataLoader(domain_files + '/train.csv', d_word_index, batch_size=args.batch_size)
-    val_loader = TextClassDataLoader(domain_files +'/val.csv', d_word_index, batch_size=args.batch_size)
-    test_loader = TextClassDataLoader(domain_files + '/test.csv', d_word_index, batch_size=args.batch_size)
-    print('===> dataloader creatin: {t:.3f}'.format(t=time.time() - end))
+    train_loader = TextClassDataLoader(domain_d + '/train.csv', d_word_index, batch_size=args.batch_size)
+    val_loader = TextClassDataLoader(domain_d +'/val.csv', d_word_index, batch_size=args.batch_size)
+    test_loader = TextClassDataLoader(domain_d + '/test.csv', d_word_index, batch_size=args.batch_size)
+    print('===> Dataloader creating: {t:.3f}'.format(t=time.time() - end))
 
     # create model
     print("===> creating rnn model ...")
@@ -243,8 +244,10 @@ def run_model(domain):
         model.cuda()
         criterion = criterion.cuda()
 
+    #List for checking early stopping
+    val_acc = []
     for epoch in range(1, args.epochs+1):
-        val_acc = []
+
         adjust_learning_rate(args.lr, optimizer, epoch)
         train(train_loader, model, criterion, optimizer, epoch)
         print ("getting performance on validation set!")
@@ -262,7 +265,7 @@ def run_model(domain):
             name_model = 'rnn_{}.pkl'.format(epoch)
             path_save_model = os.path.join('gen', name_model)
             joblib.dump(model.float(), path_save_model, compress=2)
-    print ("Results on test set!")
+    print ("Results on test set for leave-out-domain!" + domain)
     test(test_loader, model, criterion)
 
 if __name__ == '__main__':
