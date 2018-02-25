@@ -103,10 +103,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # compute output
         output = model(input_var, seq_lengths)
         loss = criterion(output, target_var)
-        out = (torch.max(output, 1))[1]
+        out = (torch.max(output, 1))[1].cpu()
         #print (out)
+
         # measoure accuracy and record loss
-        correct += (out.cpu().numpy() == target).sum()
+        correct += (out.data.numpy() == target).sum()
         prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1, input.size(0))
@@ -152,9 +153,9 @@ def test(val_loader, model, criterion):
         # compute output
         output = model(input_var,seq_lengths)
         loss = criterion(output, target_var)
-        out = (torch.max(output, 1))[1]
+        out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
-        correct += (out.cpu().numpy() == target).sum()
+        correct += (out.data.numpy() == target).sum()
         prec1 = 100 * correct / len(target_var)
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1, input.size(0))
