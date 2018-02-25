@@ -34,7 +34,7 @@ parser.add_argument('--layers', default=1, type=int, metavar='N', help='number o
 parser.add_argument('--classes', default=2, type=int, metavar='N', help='number of output classes')
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
-parser.add_argument('--early-stopping', default=3, help='early stopping on validation set')
+parser.add_argument('--early-stopping', default=3, type=int, help='early stopping on validation set')
 args = parser.parse_args()
 
 # create vocab
