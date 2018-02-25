@@ -61,8 +61,8 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         last_tensor=out_rnn[row_indices, col_indices, :]
-        # fc_input = torch.mean(last_tensor, dim=1)
+        fc_input = torch.mean(last_tensor, dim=1)
 
-        fc_input = self.bn2(last_tensor)
+        #fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         return out
