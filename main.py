@@ -28,7 +28,7 @@ parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, metavar
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
 parser.add_argument('--save-freq', '-sf', default=10, type=int, metavar='N', help='model save frequency(epoch)')
-parser.add_argument('--embedding-size', default=256, type=int, metavar='N', help='embedding size')
+parser.add_argument('--embedding-size', default=50, type=int, metavar='N', help='embedding size')
 parser.add_argument('--hidden-size', default=64, type=int, metavar='N', help='rnn hidden size')
 parser.add_argument('--layers', default=1, type=int, metavar='N', help='number of rnn layers')
 parser.add_argument('--classes', default=2, type=int, metavar='N', help='number of output classes')
@@ -263,7 +263,7 @@ def run_model(domain):
         # save current model
         if epoch % args.save_freq == 0:
             name_model = 'rnn_{}.pkl'.format(epoch)
-            path_save_model = os.path.join('gen', name_model)
+            path_save_model = os.path.join('gen_'+ domain + '/', name_model)
             joblib.dump(model.float(), path_save_model, compress=2)
     print ("Results on test set for leave-out-domain!" + domain)
     test(test_loader, model, criterion)
