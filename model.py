@@ -21,6 +21,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
 
         # embedding
+        self.embedding_dim = embed_size
         self.encoder = nn.Embedding(vocab_size, embed_size, padding_idx=0)
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
