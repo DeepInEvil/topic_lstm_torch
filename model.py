@@ -74,7 +74,7 @@ class RNN(nn.Module):
 
         yhat = []
         for j in range(x_embed.size(1)):
-            input_t = (x_embed[:, j: j + 1], 1)
+            input_t = x_embed[:, j: j + 1]
             print input_t.size()
             hx, cx = self.rnncell(input_t, (hx, cx))
             # print hx.size()
