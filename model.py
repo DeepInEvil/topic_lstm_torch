@@ -28,7 +28,7 @@ class RNN(nn.Module):
         self.rnn = nn.LSTM(
             input_size=embed_size,
             hidden_size=hidden_size,
-            num_layers=num_layers,
+            num_layers=1,
             dropout=0.5,
             batch_first=True,
             bidirectional=False
@@ -61,8 +61,8 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         last_tensor=out_rnn[row_indices, col_indices, :]
-        fc_input = torch.mean(last_tensor, dim=1)
+        #fc_input = torch.mean(last_tensor, dim=1)
 
-        #fc_input = self.bn2(last_tensor)
+        fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         return out

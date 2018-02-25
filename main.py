@@ -90,7 +90,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(train_loader):
-
+        print(seq_lengths)
         data_time.update(time.time() - end)
 
         if args.cuda:
@@ -143,7 +143,7 @@ def test(val_loader, model, criterion):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-        print (seq_lengths)
+
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
