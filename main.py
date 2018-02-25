@@ -251,11 +251,11 @@ if __name__ == '__main__':
         v_acc = validate(val_loader, model, criterion)
         val_acc.append(v_acc)
         print (len(val_acc), args.early_stopping)
-        if (len(val_acc) > args.early_stopping):
-            print ("checking early stopping.")
-            if earlystop(val_acc, v_acc):
-                print ("Early stopping!")
-                break
+        #if len(val_acc) > args.early_stopping:
+        print ("checking early stopping.")
+        if earlystop(val_acc, v_acc):
+            print ("Early stopping!")
+            break
 
         # save current model
         if epoch % args.save_freq == 0:
