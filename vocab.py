@@ -19,7 +19,6 @@ class VocabBuilder():
         else:
             raise RuntimeError('need path_file')
 
-
     def count_from_file(self, path_file):
 
         word_count = defaultdict(int)

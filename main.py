@@ -24,7 +24,7 @@ torch.manual_seed(0)
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('-b', '--batch-size', default=256, type=int, metavar='N', help='mini-batch size')
-parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, metavar='LR', help='initial learning rate')
+parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
 parser.add_argument('--save-freq', '-sf', default=10, type=int, metavar='N', help='model save frequency(epoch)')
@@ -143,7 +143,7 @@ def test(val_loader, model, criterion):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-
+        print (seq_lengths)
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -186,6 +186,7 @@ for epoch in range(1, args.epochs+1):
 
     adjust_learning_rate(args.lr, optimizer, epoch)
     train(train_loader, model, criterion, optimizer, epoch)
+    print ("getting performance on test set!")
     test(val_loader, model, criterion)
 
     # save current model
