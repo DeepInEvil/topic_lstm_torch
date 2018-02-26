@@ -46,7 +46,7 @@ class RNN(nn.Module):
 
         self.bn2 = nn.BatchNorm1d(hidden_size)
         self.fc = nn.Linear(hidden_size, num_output)
-        self.hidden = self.init_hidden(128)
+        #self.hidden = self.init_hidden(128)
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
@@ -63,20 +63,20 @@ class RNN(nn.Module):
         :param x: (batch, time_step, input_size)
         :return: num_output size
         '''
-        hx, cx = self.hidden
+        hx, cx = self.init_hidden(x.size(0))
         x_embed = self.encoder(x)
         x_embed = (self.drop_en(x_embed))
         #print x_embed[0]
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
         x_embed = x_embed.transpose(0, 1).contiguous()
-        print x_embed.size()
+        #print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
         yhat = []
-        for j in range(x_embed.size(1)):
+        for j in range(x_embed.size(0)):
             #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
             input_t = x_embed[j]
             #print input_t.size()
