@@ -103,7 +103,7 @@ class RNN(nn.Module):
         #fc_input = torch.mean(last_tensor, dim=1)
         #hx = hx.transpose(0, 1)
         #last_tensor = hx
-        print last_tensor.size()
+        #print last_tensor.size()
         #last_tensor = ht[row_indices, col_indices, :].contiguous()
         #print last_tensor.size()
         fc_input = self.bn2(last_tensor)
