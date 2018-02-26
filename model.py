@@ -98,7 +98,7 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         #last_tensor = yhat[-1]
-        last_tensor = ht[-1].contiguous()
+        last_tensor = ht[:-1].contiguous()
         print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[:-1]
