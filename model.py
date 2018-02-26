@@ -53,8 +53,8 @@ class RNN(nn.Module):
             hx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False).cuda()
             cx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False).cuda()
         else:
-            hx = Variable(torch.zeros(batch_size, self.hidden_dim))
-            cx = Variable(torch.zeros(batch_size, self.hidden_dim))
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
 
         return hx, cx
 
@@ -65,7 +65,7 @@ class RNN(nn.Module):
         '''
         hx, cx = self.hidden
         x_embed = self.encoder(x)
-        x_embed = self.drop_en(x_embed)
+        x_embed = (self.drop_en(x_embed))
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
         #x_embed = x_embed.transpose(0, 1)
         print x_embed.size()
@@ -76,7 +76,7 @@ class RNN(nn.Module):
 
         yhat = []
         for j in range(x_embed.size(1)):
-            input_t = torch.squeeze(x[:, j: j + 1], 1)
+            input_t = torch.squeeze(x[:, j: j + 1], 1).type(torch.LongTensor)
             #print input_t.size()
             hx, cx = self.rnncell(input_t, (hx, cx))
             # print hx.size()
