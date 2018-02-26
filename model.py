@@ -85,7 +85,7 @@ class RNN(nn.Module):
         #     # print hx.size()
         #     yhat.append(hx)
 
-        ht, ct = self.rnn(x_embed, None)
+        ht, ct = self.rnn(x_embed, (hx, cx))
         #print ht.size()
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
