@@ -66,7 +66,8 @@ class RNN(nn.Module):
         hx, cx = self.hidden
         x_embed = self.encoder(x)
         x_embed = self.drop_en(x_embed)
-        x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
+        #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
+        x_embed = x_embed.transpose(0, 1)
         #print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
