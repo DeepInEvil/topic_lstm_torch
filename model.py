@@ -98,11 +98,12 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         #last_tensor = yhat[-1]
-        last_tensor = ht[:, -1].contiguous()
-        print last_tensor.size()
+        #last_tensor = ht[:, -1].contiguous()
+
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[:-1]
-        #last_tensor = ht[row_indices, col_indices, :]
+        last_tensor = ht[row_indices, col_indices, :]
+        print last_tensor.size()
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         #print out.size()
