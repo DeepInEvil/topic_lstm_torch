@@ -76,6 +76,7 @@ class TextClassDataLoader(object):
         # dump padding everywhere, and place seqs on the left.
         # NOTE: you only need a tensor as big as your longest sequence
         seq_tensor = torch.zeros((len(string), seq_lengths.max())).long()
+        seq_tensor = 200 if seq_tensor > 100 else seq_tensor
         for idx, (seq, seqlen) in enumerate(zip(string, seq_lengths)):
             seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
 
