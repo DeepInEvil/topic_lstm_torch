@@ -50,8 +50,8 @@ class RNN(nn.Module):
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
-            hx = Variable(torch.zeros(1, batch_size, self.hidden_dim)).cuda()
-            cx = Variable(torch.zeros(1, batch_size, self.hidden_dim)).cuda()
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
         else:
             hx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
             cx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
