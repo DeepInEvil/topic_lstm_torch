@@ -66,7 +66,7 @@ class RNN(nn.Module):
         hx, cx = self.hidden
         x_embed = self.encoder(x)
         x_embed = (self.drop_en(x_embed))
-        print x_embed[0]
+        #print x_embed[0]
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
         x_embed = x_embed.transpose(0, 1).contiguous()
         print x_embed.size()
