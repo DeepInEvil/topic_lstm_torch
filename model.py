@@ -76,7 +76,7 @@ class RNN(nn.Module):
         # None is for initial hidden state
 
         yhat = []
-        for j in range(x_embed.size(0)):
+        for j in range(x_embed.size(1)):
             #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
             input_t = x_embed[j]
             #print input_t.size()
