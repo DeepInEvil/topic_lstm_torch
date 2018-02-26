@@ -329,7 +329,7 @@ class LSTMCell(RNNCellBase):
         for weight in self.parameters():
             weight.data.uniform_(-stdv, stdv)
 
-    def forward(self, input, topic, hx):
+    def forward(self, input, hx):
         #self.check_forward_input(input, topic)
         #self.check_forward_hidden(input, hx[0], '[0]')
         #self.check_forward_hidden(input, hx[1], '[1]')
