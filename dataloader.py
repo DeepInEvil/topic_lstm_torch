@@ -79,6 +79,8 @@ class TextClassDataLoader(object):
         seq_tensor = torch.zeros((len(string), max_seq_len)).long()
         #seq_tensor = 200 if seq_tensor > 100 else seq_tensor
         for idx, (seq, seqlen) in enumerate(zip(string, seq_lengths)):
+            if len(seq) > max_seq_len:
+                seq = [seq[i] for i in range(max_seq_len)]
             seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
 
         # SORT YOUR TENSORS BY LENGTH!
