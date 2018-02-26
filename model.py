@@ -67,16 +67,16 @@ class RNN(nn.Module):
         x_embed = self.encoder(x)
         x_embed = self.drop_en(x_embed)
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
-        x_embed = x_embed.transpose(0, 1)
-        #print x_embed.size()
+        #x_embed = x_embed.transpose(0, 1)
+        print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
         yhat = []
-        for j in range(x_embed.size(0)):
-            input_t = x_embed[j]
+        for j in range(x_embed.size(1)):
+            input_t = torch.squeeze(x[:, j: j + 1], 1)
             #print input_t.size()
             hx, cx = self.rnncell(input_t, (hx, cx))
             # print hx.size()
