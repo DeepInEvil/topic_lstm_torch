@@ -31,14 +31,14 @@ class RNN(nn.Module):
         self.hidden_dim = hidden_size
 
         # rnn module
-        self.rnn = nn.LSTM(
-            input_size=embed_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            dropout=0.0,
-            batch_first=True,
-            bidirectional=False
-        )
+        # self.rnn = nn.LSTM(
+        #     input_size=embed_size,
+        #     hidden_size=hidden_size,
+        #     num_layers=num_layers,
+        #     dropout=0.0,
+        #     batch_first=True,
+        #     bidirectional=False
+        # )
         self.rnncell = nn.LSTMCell(
             input_size=embed_size,
             hidden_size=hidden_size
