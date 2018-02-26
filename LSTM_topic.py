@@ -232,8 +232,12 @@ def LSTMCell_func(input, hidden, w_ih, w_hh, b_ih=None, b_hh=None, topic=None, t
 
     ingate, forgetgate, cellgate, outgate = gates.chunk(4, 1)
     #print topic.size(), topic_i_w.size(), ingate.size()
-    ingate = F.sigmoid(ingate + F.linear(topic, topic_i_w))
-    forgetgate = F.sigmoid(forgetgate + F.linear(topic, topic_f_w))
+    #ingate = F.sigmoid(ingate + F.linear(topic, topic_i_w))
+    print ingate.size()
+    ingate = F.sigmoid(ingate)
+
+    #forgetgate = F.sigmoid(forgetgate + F.linear(topic, topic_f_w))
+    forgetgate = F.sigmoid(forgetgate)
     cellgate = F.tanh(cellgate)
     outgate = F.sigmoid(outgate)
 
@@ -299,7 +303,7 @@ class LSTMCell(RNNCellBase):
         ...     output.append(hx)
     """
 
-    def __init__(self, input_size,topic_size, hidden_size, bias=False, drop=0.0):
+    def __init__(self, input_size, hidden_size, bias=False, drop=0.0):
         super(LSTMCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -310,8 +314,8 @@ class LSTMCell(RNNCellBase):
         #self.weight_ih = self.weight_drop(self.weight_ih)
         self.weight_hh = Parameter(torch.Tensor(4 * hidden_size, hidden_size))
         #self.weight_hh = self.recurrent_drop(self.weight_hh)
-        self.topic_w_i = Parameter(torch.Tensor(hidden_size, topic_size))
-        self.topic_w_f = Parameter(torch.Tensor(hidden_size, topic_size))
+        #self.topic_w_i = Parameter(torch.Tensor(hidden_size, topic_size))
+        #self.topic_w_f = Parameter(torch.Tensor(hidden_size, topic_size))
         if bias:
             self.bias_ih = Parameter(torch.Tensor(4 * hidden_size))
             self.bias_hh = Parameter(torch.Tensor(4 * hidden_size))
@@ -329,8 +333,13 @@ class LSTMCell(RNNCellBase):
         #self.check_forward_input(input, topic)
         #self.check_forward_hidden(input, hx[0], '[0]')
         #self.check_forward_hidden(input, hx[1], '[1]')
+        # return LSTMCell_func(
+        #     input, hx,
+        #     self.weight_ih, self.weight_hh,
+        #     self.bias_ih, self.bias_hh, topic, self.topic_w_i, self.topic_w_f, self.weight_drop
+        # )
         return LSTMCell_func(
             input, hx,
             self.weight_ih, self.weight_hh,
-            self.bias_ih, self.bias_hh, topic, self.topic_w_i, self.topic_w_f, self.weight_drop
+            self.bias_ih, self.bias_hh,
         )
