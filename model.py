@@ -66,7 +66,7 @@ class RNN(nn.Module):
         hx, cx = self.init_hidden(x.size(0))
         x_embed = self.encoder(x)
         x_embed = (self.drop_en(x_embed))
-        print x_embed
+        print x_embed.size()
         #print x_embed[0]
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
         #x_embed = x_embed.transpose(0, 1)
@@ -98,8 +98,8 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         #last_tensor = yhat[-1]
-        last_tensor = ht[-1]
-        #print last_tensor.size()
+        last_tensor = ht[-1].contiguous()
+        print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
         #last_tensor = ht[:-1]
         #last_tensor = ht[row_indices, col_indices, :]
