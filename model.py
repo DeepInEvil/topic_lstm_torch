@@ -90,17 +90,18 @@ class RNN(nn.Module):
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
-        #row_indices = torch.arange(0, x.size(0)).long()
-        #col_indices = seq_lengths - 1
-        #if next(self.parameters()).is_cuda:
-        #    row_indices = row_indices.cuda()
-        #    col_indices = col_indices.cuda()
+        row_indices = torch.arange(0, x.size(0)).long()
+        col_indices = seq_lengths - 1
+        if next(self.parameters()).is_cuda:
+            row_indices = row_indices.cuda()
+            col_indices = col_indices.cuda()
 
         #last_tensor = yhat[-1]
         #last_tensor = ht[-1]
         #print last_tensor.size()
         #fc_input = torch.mean(last_tensor, dim=1)
-        last_tensor = ht[:-1]
+        #last_tensor = ht[:-1]
+        last_tensor = ht[row_indices, col_indices, :]
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         #print out.size()
