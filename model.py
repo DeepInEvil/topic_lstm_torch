@@ -50,11 +50,11 @@ class RNN(nn.Module):
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
-            hx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
-            cx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
+            hx = Variable(torch.zeros(1, batch_size, self.hidden_dim)).cuda()
+            cx = Variable(torch.zeros(1, batch_size, self.hidden_dim)).cuda()
         else:
-            hx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
-            cx = Variable(torch.zeros(batch_size, self.hidden_dim), requires_grad=False)
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim))
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim))
 
         return hx, cx
 
@@ -104,7 +104,7 @@ class RNN(nn.Module):
         #ht = ht.transpose(0, 1)
         #last_tensor = ht[-1]
         #last_tensor = ht[row_indices, col_indices, :].contiguous()
-        print last_tensor.size()
+        #print last_tensor.size()
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
         #print out.size()
