@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from torch.autograd import Variable
-
+from LSTM_topic import LSTMCell
 
 class RNN(nn.Module):
 
@@ -39,7 +39,7 @@ class RNN(nn.Module):
         #     batch_first=True,
         #     bidirectional=False
         # )
-        self.rnncell = nn.LSTMCell(
+        self.rnncell = LSTMCell(
             input_size=embed_size,
             hidden_size=hidden_size
         )
