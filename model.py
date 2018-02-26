@@ -31,14 +31,14 @@ class RNN(nn.Module):
         self.hidden_dim = hidden_size
 
         #rnn module
-        self.rnn = nn.LSTM(
-            input_size=embed_size,
-            hidden_size=hidden_size,
-            num_layers=1,
-            dropout=0.0,
-            batch_first=True,
-            bidirectional=False
-        )
+        # self.rnn = nn.LSTM(
+        #     input_size=embed_size,
+        #     hidden_size=hidden_size,
+        #     num_layers=1,
+        #     dropout=0.0,
+        #     batch_first=True,
+        #     bidirectional=False
+        # )
         self.rnncell = nn.LSTMCell(
             input_size=embed_size,
             hidden_size=hidden_size
@@ -66,27 +66,27 @@ class RNN(nn.Module):
         hx, cx = self.init_hidden(x.size(0))
         x_embed = self.encoder(x)
         x_embed = (self.drop_en(x_embed))
-        print x_embed.size()
+        #print x_embed.size()
         #print x_embed[0]
         #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
-        #x_embed = x_embed.transpose(0, 1)
+        x_embed = x_embed.transpose(0, 1)
         #print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
-        # yhat = []
-        # for j in range(x_embed.size(0)):
-        #     #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
-        #     input_t = x_embed[j]
-        #     #print input_t.size()
-        #     #print hx[0]
-        #     hx, cx = self.rnncell(input_t, (hx, cx))
-        #     # print hx.size()
-        #     yhat.append(hx)
+        yhat = []
+        for j in range(x_embed.size(0)):
+             #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
+             input_t = x_embed[j]
+             #print input_t.size()
+             #print hx[0]
+             hx, cx = self.rnncell(input_t, (hx, cx))
+             # print hx.size()
+             yhat.append(hx)
 
-        ht, ct = self.rnn(x_embed, (hx, cx))
+        #ht, ct = self.rnn(x_embed, (hx, cx))
         #print ht.size()
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
@@ -97,12 +97,12 @@ class RNN(nn.Module):
         #     row_indices = row_indices.cuda()
         #     col_indices = col_indices.cuda()
 
-        #last_tensor = yhat[-1]
+        last_tensor = yhat[-1]
         #last_tensor = ht[:, -1].contiguous()
 
         #fc_input = torch.mean(last_tensor, dim=1)
-        ht = ht.transpose(0, 1)
-        last_tensor = ht[-1]
+        #ht = ht.transpose(0, 1)
+        #last_tensor = ht[-1]
         #last_tensor = ht[row_indices, col_indices, :].contiguous()
         print last_tensor.size()
         fc_input = self.bn2(last_tensor)
