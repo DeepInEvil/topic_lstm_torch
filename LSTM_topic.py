@@ -275,6 +275,7 @@ def LSTMtopicCell_func(input, hidden, w_ih, w_hh, b_ih=None, b_hh=None, topic=No
 
     return hy, cy
 
+
 class LSTMCell(RNNCellBase):
     r"""A long short-term memory (LSTM) cell.
 
