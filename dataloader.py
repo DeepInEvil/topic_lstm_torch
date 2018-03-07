@@ -5,6 +5,7 @@ from collections import Counter
 
 import util as ut
 
+
 class TextClassDataLoader(object):
 
     def __init__(self, path_file, word_to_index, batch_size=32):

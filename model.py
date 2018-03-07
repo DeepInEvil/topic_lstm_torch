@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from torch.autograd import Variable
-from LSTM_topic import LSTMCell
+from LSTM_topic import LSTMCell, LSTMtopicCell
+
 
 class RNN(nn.Module):
 
@@ -80,7 +81,7 @@ class RNN(nn.Module):
         for j in range(x_embed.size(0)):
              #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
              input_t = x_embed[j]
-             #print input_t.size()
+             print input_t.size()
              #print hx[0]
              hx, cx = self.rnncell(input_t, (hx, cx))
              # print hx.size()
@@ -112,9 +113,9 @@ class RNN(nn.Module):
         return out
 
 
-class RNN_topic(nn.Module):
+class RNNTopic(nn.Module):
 
-    def __init__(self, vocab_size, embed_size, num_output, hidden_size=64,
+    def __init__(self, vocab_size, embed_size, num_output, topic_size, hidden_size=64,
                                           num_layers=2, batch_first=True, use_gpu=False, embeddings = None):
 
         '''
@@ -126,7 +127,7 @@ class RNN_topic(nn.Module):
         :param batch_first: batch first option
         '''
 
-        super(RNN_topic, self).__init__()
+        super(RNNTopic, self).__init__()
 
         # embedding
         self.embedding_dim = embed_size
@@ -138,64 +139,84 @@ class RNN_topic(nn.Module):
         self.use_gpu = use_gpu
         self.hidden_dim = hidden_size
 
-        # rnn module
-        self.rnn = nn.LSTM(
+        #rnn module
+        # self.rnn = nn.LSTM(
+        #     input_size=embed_size,
+        #     hidden_size=hidden_size,
+        #     num_layers=1,
+        #     dropout=0.0,
+        #     batch_first=True,
+        #     bidirectional=False
+        # )
+        self.rnncell = LSTMtopicCell(
             input_size=embed_size,
             hidden_size=hidden_size,
-            num_layers=num_layers,
-            dropout=0.5,
-            batch_first=True,
-            bidirectional=False
-        )
-        self.rnncell = nn.LSTMCell(
-            input_size=embed_size,
-            hidden_size=hidden_size
+            topic_size = topic_size
         )
 
         self.bn2 = nn.BatchNorm1d(hidden_size)
         self.fc = nn.Linear(hidden_size, num_output)
+        #self.hidden = self.init_hidden(128)
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
-            h0 = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
-            c0 = Variable(torch.zeros(1, batch_size, self.hidden_dim).cuda())
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim)).cuda()
         else:
-            h0 = Variable(torch.zeros(1, batch_size, self.hidden_dim))
-            c0 = Variable(torch.zeros(1, batch_size, self.hidden_dim))
-        return (h0, c0)
+            hx = Variable(torch.zeros(batch_size, self.hidden_dim))
+            cx = Variable(torch.zeros(batch_size, self.hidden_dim))
 
-    def forward(self, x, seq_lengths):
+        return hx, cx
+
+    def forward(self, x, x_top, seq_length):
         '''
         :param x: (batch, time_step, input_size)
         :return: num_output size
         '''
-
+        hx, cx = self.init_hidden(x.size(0))
         x_embed = self.encoder(x)
-        x_embed = self.drop_en(x_embed)
+        x_embed = (self.drop_en(x_embed))
+        #print x_embed.size()
+        #print x_embed[0]
+        #x_embed = x_embed.view(x_embed.size(1), x_embed.size(0), -1)
+        x_embed = x_embed.transpose(0, 1)
         #print x_embed.size()
         #packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), batch_first=self.batch_first)
         #x = x.view(x_embed.size(1), x_embed.size(0), self.embedding_dim)
         # r_out shape (batch, time_step, output_size)
         # None is for initial hidden state
 
+        yhat = []
+        for j in range(x_embed.size(0)):
+             #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
+             input_t = x_embed[j]
+             #print input_t.size()
+             #print hx[0]
+             hx, cx = self.rnncell(input_t, x_top, (hx, cx))
+             # print hx.size()
+             yhat.append(hx)
 
-        self.hidden = self.init_hidden(x.size(0))
-        ht, ct = self.rnn(x_embed, self.hidden)
+        #ht, ct = self.rnn(x_embed, (hx, cx))
         #print ht.size()
         # use mean of outputs
         #out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
 
-        row_indices = torch.arange(0, x.size(0)).long()
-        col_indices = seq_lengths - 1
-        if next(self.parameters()).is_cuda:
-            row_indices = row_indices.cuda()
-            col_indices = col_indices.cuda()
+        #row_indices = torch.arange(0, x.size(0)).long()
+        #col_indices = seq_lengths - 1
+        # if next(self.parameters()).is_cuda:
+        #     row_indices = row_indices.cuda()
+        #     col_indices = col_indices.cuda()
 
-        last_tensor = ht[row_indices, col_indices, :]
-        #last_tensor = ht[-1]
-        #print last_tensor.size()
+        last_tensor = yhat[-1]
+        #last_tensor = ht[:, -1].contiguous()
+
         #fc_input = torch.mean(last_tensor, dim=1)
-        #last_tensor = ht[:-1]
+        #hx = hx.transpose(0, 1)
+        #last_tensor = hx
+        #print last_tensor.size()
+        #last_tensor = ht[row_indices, col_indices, :].contiguous()
+        #print last_tensor.size()
         fc_input = self.bn2(last_tensor)
         out = self.fc(fc_input)
+        #print out.size()
         return out

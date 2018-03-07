@@ -92,11 +92,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
     for i, (input, target, seq_lengths) in enumerate(train_loader):
         #print (input, target)
         data_time.update(time.time() - end)
-        print ((input.size()))
+        inp_topic = torch.Tensor(input.size(0), 20).uniform_(0, 1).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
-
+        topic_var = torch.autograd.Variable(inp_topic)
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
 
