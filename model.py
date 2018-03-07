@@ -81,7 +81,7 @@ class RNN(nn.Module):
         for j in range(x_embed.size(0)):
              #input_t = torch.squeeze(x_embed[:, j: j + 1], 1)
              input_t = x_embed[j]
-             print input_t.size()
+             #print input_t.size()
              #print hx[0]
              hx, cx = self.rnncell(input_t, (hx, cx))
              # print hx.size()
