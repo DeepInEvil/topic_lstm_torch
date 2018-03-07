@@ -101,7 +101,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         target_var = torch.autograd.Variable(target)
 
         # compute output
-        output = model(input_var, seq_lengths)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         #print (out)

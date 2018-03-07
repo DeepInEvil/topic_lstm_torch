@@ -168,7 +168,7 @@ class RNNTopic(nn.Module):
 
         return hx, cx
 
-    def forward(self, x, x_top, seq_length):
+    def forward(self, x, x_top):
         '''
         :param x: (batch, time_step, input_size)
         :return: num_output size
