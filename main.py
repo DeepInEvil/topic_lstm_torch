@@ -92,7 +92,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     for i, (input, target, seq_lengths) in enumerate(train_loader):
         #print (input, target)
         data_time.update(time.time() - end)
-        inp_topic = torch.zeros(input.size(0), 20).uniform_(0, 1).cuda()
+        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -143,7 +143,7 @@ def validate(val_loader, model, criterion):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-        inp_topic = torch.zeros(input.size(0), 20).uniform_(0, 1).cuda()
+        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -195,7 +195,7 @@ def test(test_loader, model, criterion):
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
-        inp_topic = torch.zeros(input.size(0), 20).uniform_(0, 1).cuda()
+        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
         topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
