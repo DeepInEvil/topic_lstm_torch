@@ -96,9 +96,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
-        topic_var = torch.Variable(inp_topic, requires_grad = False)
-        input_var = torch.Variable(input, requires_grad = False)
-        target_var = torch.Variable(target, requires_grad = False)
+        topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
+        input_var = torch.autograd.Variable(input, requires_grad = False)
+        target_var = torch.autograd.Variable(target, requires_grad = False)
 
         # compute output
         output = model(input_var, topic_var)
@@ -148,9 +148,9 @@ def validate(val_loader, model, criterion):
             input = input.cuda(async=True)
             target = target.cuda(async=True)
 
-        topic_var = torch.Variable(inp_topic, requires_grad = False)
-        input_var = torch.Variable(input, requires_grad = False)
-        target_var = torch.Variable(target, requires_grad = False)
+        topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
+        input_var = torch.autograd.Variable(input, requires_grad = False)
+        target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
         output = model(input_var, topic_var)
         loss = criterion(output, target_var)
@@ -196,9 +196,9 @@ def test(test_loader, model, criterion):
             input = input.cuda(async=True)
             target = target.cuda(async=True)
         inp_topic = torch.zeros(input.size(0), 20).uniform_(0, 1).cuda()
-        topic_var = torch.Variable(inp_topic, requires_grad = False)
-        input_var = torch.Variable(input, requires_grad = False)
-        target_var = torch.Variable(target, requires_grad = False)
+        topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
+        input_var = torch.autograd.Variable(input, requires_grad = False)
+        target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
         output = model(input_var, topic_var)
         loss = criterion(output, target_var)
