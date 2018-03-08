@@ -14,6 +14,7 @@ def create_lda(train_path):
     train_dat = [sent.split() for sent in train_dat]
     print train_dat[0]
     dictionary = corpora.Dictionary(train_dat)
+    dictionary.save(train_path + '/lda_model/dict_' + train_path.split('_')[-1])
     doc_term_matrix = [dictionary.doc2bow(doc) for doc in train_dat]
     Lda = gensim.models.ldamodel.LdaModel
     ldamodel = Lda(doc_term_matrix, num_topics=50, id2word=dictionary, passes=50)
