@@ -256,7 +256,7 @@ def run_model(domain):
     # create model
     print("===> creating rnn model ...")
     model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
-                num_output=args.classes, topic_size=20, hidden_size=args.hidden_size,
+                num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
                 num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
     print(model)
 
