@@ -68,7 +68,53 @@ def load_glove_embeddings(path, word2idx, embedding_dim=50):
         return torch.from_numpy(embeddings).float()
 
 
+def get_lda_vec(lda_dict):
+    """
+    get lda vector
+    :param lda_dict:
+    :return:
+    """
+    lda_vec = np.zeros(50)
+    for id, val in lda_dict:
+        lda_vec[id] = val
+    return lda_vec
+
+
+def get_id2word(idx, idx2w_dict):
+    """
+    get id2word mappings
+    :param idx:
+    :param idx2w_dict:
+    :return:
+    """
+    try:
+        return idx2w_dict[idx]
+    except KeyError:
+        return '__UNK__'
+
+
+def get_alpha(texts, lda, dictionari, idx2word):
+    """
+    get doc-topic distribution vector for all reviews
+    :param texts:
+    :param lda:e
+    :param dictionari:
+    :param idx2word:
+    :return:
+    """
+    texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
+    review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
+
+    return review_alphas
+
+
 def earlystop(val_acc_list, current_val_acc):
+    """
+    early stopping if accuracy doesn't increases after n steps
+    :param val_acc_list:
+    :param current_val_acc:
+    :return:
+    """
     #print (current_val_acc, best_val_acc)
     if len(val_acc_list) > args.early_stopping:
         best_val_acc = np.max(val_acc_list[-args.early_stopping:])
@@ -81,7 +127,7 @@ def earlystop(val_acc_list, current_val_acc):
         return False
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dictionary, word2id):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -94,7 +140,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
     for i, (input, target, seq_lengths) in enumerate(train_loader):
         #print (input, target)
         data_time.update(time.time() - end)
-        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
+
+        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id)
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -242,7 +289,7 @@ def run_model(domain):
     v_builder = VocabBuilder(path_file=domain_d + '/train.csv', min_sample=args.min_samples)
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
-    print (d_word_index)
+    word2id = {k: v for k, v in d_word_index.iteritems()}
     embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
         os.mkdir('gen_' + domain)
@@ -282,7 +329,7 @@ def run_model(domain):
     for epoch in range(1, args.epochs+1):
 
         adjust_learning_rate(args.lr, optimizer, epoch)
-        train(train_loader, model, criterion, optimizer, epoch)
+        train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dict, word2id)
         print ("getting performance on validation set!")
         v_acc = validate(val_loader, model, criterion)
         print (len(val_acc), args.early_stopping)
