@@ -143,16 +143,16 @@ def validate(val_loader, model, criterion):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-
+        inp_topic = torch.Tensor(input.size(0), 20).uniform_(0, 1).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
 
         input_var = torch.autograd.Variable(input, volatile=True)
         target_var = torch.autograd.Variable(target, volatile=True)
-
+        topic_var = torch.autograd.Variable(inp_topic)
         # compute output
-        output = model(input_var, seq_lengths)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -195,12 +195,12 @@ def test(test_loader, model, criterion):
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
-
+        inp_topic = torch.Tensor(input.size(0), 20).uniform_(0, 1).cuda()
         input_var = torch.autograd.Variable(input, volatile=True)
         target_var = torch.autograd.Variable(target, volatile=True)
-
+        topic_var = torch.autograd.Variable(inp_topic)
         # compute output
-        output = model(input_var, seq_lengths)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
