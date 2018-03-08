@@ -456,6 +456,7 @@ class LSTMtopicCell(RNNCellBase):
             weight.data.uniform_(-stdv, stdv)
 
     def forward(self, input, topic, hx):
+        print topic.size()
         #self.check_forward_input(input, topic)
         #self.check_forward_hidden(input, hx[0], '[0]')
         #self.check_forward_hidden(input, hx[1], '[1]')
