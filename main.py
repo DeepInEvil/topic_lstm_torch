@@ -105,7 +105,7 @@ def get_alpha(texts, lda, dictionari, idx2word):
     texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
 
-    return review_alphas
+    return torch.from_numpy(review_alphas)
 
 
 def earlystop(val_acc_list, current_val_acc):
@@ -141,7 +141,7 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         #print (input, target)
         data_time.update(time.time() - end)
 
-        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id)
+        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -182,7 +182,7 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
             gc.collect()
 
 
-def validate(val_loader, model, criterion):
+def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -192,7 +192,7 @@ def validate(val_loader, model, criterion):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
+        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -230,7 +230,7 @@ def validate(val_loader, model, criterion):
     return top1.avg
 
 
-def test(test_loader, model, criterion):
+def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -244,7 +244,8 @@ def test(test_loader, model, criterion):
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
-        inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
+        #inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
+        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
@@ -331,7 +332,7 @@ def run_model(domain):
         adjust_learning_rate(args.lr, optimizer, epoch)
         train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dict, word2id)
         print ("getting performance on validation set!")
-        v_acc = validate(val_loader, model, criterion)
+        v_acc = validate(val_loader, model, criterion, lda_model, lda_dict, word2id)
         print (len(val_acc), args.early_stopping)
         #if len(val_acc) > args.early_stopping:
         print ("checking early stopping.")
@@ -346,7 +347,7 @@ def run_model(domain):
             path_save_model = os.path.join('gen_'+ domain + '/', name_model)
             joblib.dump(model.float(), path_save_model, compress=2)
     print ("Results on test set for leave-out-domain!" + domain)
-    test_acc = test(test_loader, model, criterion)
+    test_acc = test(test_loader, model, criterion, lda_model, lda_dict, word2id)
     return test_acc
 
 
