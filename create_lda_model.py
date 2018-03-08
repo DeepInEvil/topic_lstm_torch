@@ -5,7 +5,8 @@ import gensim
 from gensim import corpora
 import os
 
-review_d = '/home/deep/cnn-text-classification-pytorch/topic_lstm_torch/reviews/'
+#review_d = '/home/deep/cnn-text-classification-pytorch/topic_lstm_torch/reviews/'
+review_d = '/home/DebanjanChaudhuri/topic_lstm_torch/reviews'
 
 
 def create_lda(train_path):
@@ -24,4 +25,4 @@ def create_lda(train_path):
 
 if __name__ == '__main__':
     for dir in os.listdir(review_d):
-        create_lda(review_d + dir)
+        create_lda(review_d + '/' + dir)
