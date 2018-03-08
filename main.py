@@ -17,6 +17,8 @@ from model import RNN, RNNTopic
 from util import AverageMeter, accuracy
 from util import adjust_learning_rate
 from sklearn.metrics import accuracy_score
+from gensim import models
+import gensim
 
 np.random.seed(0)
 torch.manual_seed(0)
@@ -234,10 +236,13 @@ def run_model(domain):
     print("===> creating vocabs for domain..." + domain)
     end = time.time()
     domain_d = 'reviews/leave_out_' + domain
+    lda_model = models.LdaModel.load(domain_d + '/lda_model/lda_' + domain)
+    lda_dict = gensim.corpora.Dictionary.load(domain_d + '/lda_model/dict_' + domain)
     print (domain_d)
     v_builder = VocabBuilder(path_file=domain_d + '/train.csv', min_sample=args.min_samples)
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
+    print d_word_index
     embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
         os.mkdir('gen_' + domain)
@@ -296,6 +301,7 @@ def run_model(domain):
     print ("Results on test set for leave-out-domain!" + domain)
     test_acc = test(test_loader, model, criterion)
     return test_acc
+
 
 if __name__ == '__main__':
     domain_acc_dict = {}
