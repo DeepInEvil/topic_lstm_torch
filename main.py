@@ -117,7 +117,7 @@ def get_theta(texts, lda, dictionari, idx2word):
     texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
     #print (texts)
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
-    print (review_alphas)
+    #print (review_alphas)
     return torch.from_numpy(review_alphas)
 
 
@@ -156,7 +156,7 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
 
         inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         inp_topic = inp_topic.type(torch.cuda.FloatTensor)
-        print (inp_topic[0])
+        #print (inp_topic[0])
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
