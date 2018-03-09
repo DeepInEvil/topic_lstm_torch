@@ -370,7 +370,7 @@ class LSTMCell(RNNCellBase):
         return LSTMCell_func(
             input, hx,
             self.weight_ih, self.weight_hh,
-            self.bias_ih, self.bias_hh,
+            self.bias_ih, self.bias_hh, drop=self.weight_drop
         )
 
 
