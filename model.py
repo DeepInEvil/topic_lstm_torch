@@ -27,9 +27,11 @@ class RNN(nn.Module):
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
         self.batch_first = batch_first
-        self.drop_en = nn.Dropout(p=0.8)
+        self.drop_en = nn.Dropout(p=0.6)
+        self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
         self.hidden_dim = hidden_size
+        self.hidden_fc = 100
 
         #rnn module
         # self.rnn = nn.LSTM(
@@ -46,7 +48,8 @@ class RNN(nn.Module):
         )
 
         self.bn2 = nn.BatchNorm1d(hidden_size)
-        self.fc = nn.Linear(hidden_size, num_output)
+        self.fc1 = nn.Linear(self.hidden_dim, self.hidden_fc)
+        self.fc2 = nn.Linear(self.hidden_fc, num_output)
         #self.hidden = self.init_hidden(128)
 
     def init_hidden(self, batch_size):
@@ -59,7 +62,7 @@ class RNN(nn.Module):
 
         return hx, cx
 
-    def forward(self, x, seq_lengths):
+    def forward(self, x):
         '''
         :param x: (batch, time_step, input_size)
         :return: num_output size
@@ -107,8 +110,10 @@ class RNN(nn.Module):
         #print last_tensor.size()
         #last_tensor = ht[row_indices, col_indices, :].contiguous()
         #print last_tensor.size()
-        fc_input = self.bn2(last_tensor)
-        out = self.fc(fc_input)
+        fc1_inp = self.fc1(last_tensor)
+        fc_input = self.bn2(fc1_inp)
+        fc_out = self.drop_fc(fc_input)
+        out = self.fc2(fc_out)
         #print out.size()
         return out
 
@@ -136,8 +141,10 @@ class RNNTopic(nn.Module):
             self.encoder.weight = nn.Parameter(embeddings)
         self.batch_first = batch_first
         self.drop_en = nn.Dropout(p=0.8)
+        self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
         self.hidden_dim = hidden_size
+        self.hidden_fc = 100
 
         #rnn module
         # self.rnn = nn.LSTM(
@@ -216,7 +223,9 @@ class RNNTopic(nn.Module):
         #print last_tensor.size()
         #last_tensor = ht[row_indices, col_indices, :].contiguous()
         #print last_tensor.size()
-        fc_input = self.bn2(last_tensor)
-        out = self.fc(fc_input)
+        fc1_inp = self.fc1(last_tensor)
+        fc_input = self.bn2(fc1_inp)
+        fc_out = self.drop_fc(fc_input)
+        out = self.fc2(fc_out)
         #print out.size()
         return out

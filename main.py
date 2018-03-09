@@ -26,7 +26,7 @@ torch.manual_seed(0)
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--epochs', default=50*2, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('-b', '--batch-size', default=128, type=int, metavar='N', help='mini-batch size')
-parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, metavar='LR', help='initial learning rate')
+parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
 parser.add_argument('--save-freq', '-sf', default=10, type=int, metavar='N', help='model save frequency(epoch)')
@@ -165,7 +165,8 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         target_var = torch.autograd.Variable(target, requires_grad = False)
 
         # compute output
-        output = model(input_var, topic_var)
+        output = model(input_var)
+        #output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         #print (out)
@@ -217,7 +218,8 @@ def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        output = model(input_var, topic_var)
+        output = model(input_var)
+        #output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -266,7 +268,8 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        output = model(input_var, topic_var)
+        output = model(input_var)
+        #output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -325,9 +328,12 @@ def run_model(domain):
 
     # create model
     print("===> creating rnn model ...")
-    model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
-                num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
+    model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
+                num_output=args.classes, hidden_size=args.hidden_size,
                 num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
+    # model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
+    #             num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
+    #             num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
     #print(model)
 
     # optimizer and loss
