@@ -142,7 +142,8 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         data_time.update(time.time() - end)
 
         inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
-        inp_topic = inp_topic.type(torch.cuda.DoubleTensor)
+        inp_topic = inp_topic.type(torch.cuda.FloatTensor)
+        print (inp_topic[0])
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -194,7 +195,7 @@ def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
         inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
-        inp_topic = inp_topic.type(torch.cuda.DoubleTensor)
+        inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
@@ -248,7 +249,7 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
             target = target.cuda(async=True)
         #inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
         inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
-        inp_topic = inp_topic.type(torch.cuda.DoubleTensor)
+        inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
