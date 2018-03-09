@@ -113,8 +113,8 @@ def get_theta(texts, lda, dictionari, idx2word):
     :param idx2word:
     :return:
     """
-    print (texts[0])
-    texts = [get_words(sent, idx2word) for sent in texts]
+    #print (texts[0])
+    texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
     #print (texts)
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
     print (review_alphas)
@@ -307,7 +307,7 @@ def run_model(domain):
     v_builder = VocabBuilder(path_file=domain_d + '/train.csv', min_sample=args.min_samples)
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
-    word2id = {k: v for k, v in d_word_index.iteritems()}
+    word2id = {v: k for k, v in d_word_index.iteritems()}
     print (word2id)
     embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
