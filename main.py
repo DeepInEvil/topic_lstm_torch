@@ -93,15 +93,15 @@ def get_id2word(idx, idx2w_dict):
         return '__UNK__'
 
 
-def get_words(texts, idx2word):
+def get_words(sent, idx2word):
     """
     get words from word2id dict
     :param texts:
     :return:
     """
-    texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
-    print (texts)
-    return texts
+    out_sent = [get_id2word(idx, idx2word) for idx in sent]
+    print (out_sent)
+    return out_sent
 
 
 def get_theta(texts, lda, dictionari, idx2word):
