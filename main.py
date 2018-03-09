@@ -113,6 +113,7 @@ def get_theta(texts, lda, dictionari, idx2word):
     :param idx2word:
     :return:
     """
+    print (texts[0])
     texts = [get_words(sent, idx2word) for sent in texts]
     print (texts)
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
