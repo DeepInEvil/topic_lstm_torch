@@ -100,7 +100,7 @@ def get_words(sent, idx2word):
     :return:
     """
     out_sent = [get_id2word(idx, idx2word) for idx in sent]
-    print (out_sent)
+    #print (out_sent)
     return out_sent
 
 
@@ -115,7 +115,7 @@ def get_theta(texts, lda, dictionari, idx2word):
     """
     print (texts[0])
     texts = [get_words(sent, idx2word) for sent in texts]
-    print (texts)
+    #print (texts)
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
     print (review_alphas)
     return torch.from_numpy(review_alphas)
@@ -207,7 +207,7 @@ def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(val_loader):
-        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
+        inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         if args.cuda:
             input = input.cuda(async=True)
@@ -261,7 +261,7 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
             input = input.cuda(async=True)
             target = target.cuda(async=True)
         #inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
-        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
+        inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
         input_var = torch.autograd.Variable(input, requires_grad = False)
@@ -308,6 +308,7 @@ def run_model(domain):
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
     word2id = {k: v for k, v in d_word_index.iteritems()}
+    print (word2id)
     embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
         os.mkdir('gen_' + domain)
