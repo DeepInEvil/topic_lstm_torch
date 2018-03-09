@@ -93,7 +93,18 @@ def get_id2word(idx, idx2w_dict):
         return '__UNK__'
 
 
-def get_alpha(texts, lda, dictionari, idx2word):
+def get_words(texts, idx2word):
+    """
+    get words from word2id dict
+    :param texts:
+    :return:
+    """
+    texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
+    print (texts)
+    return texts
+
+
+def get_theta(texts, lda, dictionari, idx2word):
     """
     get doc-topic distribution vector for all reviews
     :param texts:
@@ -102,7 +113,7 @@ def get_alpha(texts, lda, dictionari, idx2word):
     :param idx2word:
     :return:
     """
-    texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
+    texts = [get_words(sent, idx2word) for sent in texts]
     print (texts)
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
     print (review_alphas)
@@ -142,7 +153,7 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         #print (input, target)
         data_time.update(time.time() - end)
 
-        inp_topic = get_alpha(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
+        inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
         inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         print (inp_topic[0])
         if args.cuda:
