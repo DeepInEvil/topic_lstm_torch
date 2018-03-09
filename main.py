@@ -74,7 +74,7 @@ def get_lda_vec(lda_dict):
     :param lda_dict:
     :return:
     """
-    lda_vec = np.zeros(50)
+    lda_vec = np.zeros(50, dtype='float32')
     for id, val in lda_dict:
         lda_vec[id] = val
     return lda_vec
@@ -104,7 +104,7 @@ def get_alpha(texts, lda, dictionari, idx2word):
     """
     texts = [[get_id2word(idx, idx2word) for idx in sent] for sent in texts]
     review_alphas = np.array([get_lda_vec(lda[dictionari.doc2bow(sentence)]) for sentence in texts])
-
+    print (review_alphas)
     return torch.from_numpy(review_alphas)
 
 
