@@ -47,7 +47,7 @@ class RNN(nn.Module):
             hidden_size=hidden_size
         )
 
-        self.bn2 = nn.BatchNorm1d(hidden_size)
+        self.bn2 = nn.BatchNorm1d(self.hidden_fc)
         self.fc1 = nn.Linear(self.hidden_dim, self.hidden_fc)
         self.fc2 = nn.Linear(self.hidden_fc, num_output)
         #self.hidden = self.init_hidden(128)
@@ -161,9 +161,9 @@ class RNNTopic(nn.Module):
             topic_size = topic_size
         )
 
-        self.bn2 = nn.BatchNorm1d(hidden_size)
-        self.fc = nn.Linear(hidden_size, num_output)
-        #self.hidden = self.init_hidden(128)
+        self.bn2 = nn.BatchNorm1d(self.hidden_fc)
+        self.fc1 = nn.Linear(self.hidden_dim, self.hidden_fc)
+        self.fc2 = nn.Linear(self.hidden_fc, num_output)
 
     def init_hidden(self, batch_size):
         if self.use_gpu:
