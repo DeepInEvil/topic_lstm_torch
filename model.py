@@ -27,7 +27,7 @@ class RNN(nn.Module):
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
         self.batch_first = batch_first
-        self.drop_en = nn.Dropout(p=0.6)
+        self.drop_en = nn.Dropout(p=0.8)
         self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
         self.hidden_dim = hidden_size
