@@ -165,8 +165,8 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         target_var = torch.autograd.Variable(target, requires_grad = False)
 
         # compute output
-        output = model(input_var)
-        #output = model(input_var, topic_var)
+        #output = model(input_var)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         #print (out)
@@ -218,8 +218,8 @@ def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        output = model(input_var)
-        #output = model(input_var, topic_var)
+        #output = model(input_var)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -268,8 +268,8 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        output = model(input_var)
-        #output = model(input_var, topic_var)
+        #output = model(input_var)
+        output = model(input_var, topic_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -328,12 +328,12 @@ def run_model(domain):
 
     # create model
     print("===> creating rnn model ...")
-    model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
-                num_output=args.classes, hidden_size=args.hidden_size,
-                num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
-    # model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
-    #             num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
+    # model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
+    #             num_output=args.classes, hidden_size=args.hidden_size,
     #             num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
+    model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
+                num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
+                num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
     #print(model)
 
     # optimizer and loss
