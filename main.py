@@ -256,13 +256,12 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
     correct = 0.0
     end = time.time()
     for i, (input, target, seq_lengths) in enumerate(test_loader):
-
+        inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
+        inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         if args.cuda:
             input = input.cuda(async=True)
             target = target.cuda(async=True)
         #inp_topic = torch.zeros(input.size(0), 50).uniform_(0, 1).cuda()
-        inp_topic = get_theta(input.numpy(), lda_model, lda_dictionary, word2id).cuda()
-        inp_topic = inp_topic.type(torch.cuda.FloatTensor)
         topic_var = torch.autograd.Variable(inp_topic, requires_grad = False)
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
@@ -308,7 +307,7 @@ def run_model(domain):
     d_word_index = v_builder.get_word_index()
     vocab_size = len(d_word_index)
     word2id = {v: k for k, v in d_word_index.iteritems()}
-    print (word2id)
+    #print (word2id)
     embeddings = load_glove_embeddings('/home/DebanjanChaudhuri/topic_lstm_torch/word_vecs/glove.6B.50d.txt', d_word_index)
     if not os.path.exists('gen_' + domain):
         os.mkdir('gen_' + domain)
@@ -329,7 +328,7 @@ def run_model(domain):
     model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
                 num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
                 num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
-    print(model)
+    #print(model)
 
     # optimizer and loss
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
