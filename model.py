@@ -8,7 +8,7 @@ from LSTM_topic import LSTMCell, LSTMtopicCell
 class RNN(nn.Module):
 
     def __init__(self, vocab_size, embed_size, num_output, hidden_size=64,
-                                          num_layers=2, batch_first=True, use_gpu=False, embeddings = None):
+                                          num_layers=2, batch_first=True, use_gpu=False, embeddings=None, emb_drop=None, fc_size=None):
 
         '''
         :param vocab_size: vocab size
@@ -27,11 +27,10 @@ class RNN(nn.Module):
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
         self.batch_first = batch_first
-        self.drop_en = nn.Dropout(p=0.8)
+        self.drop_en = nn.Dropout(p=emb_drop)
         self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
-        self.hidden_dim = hidden_size
-        self.hidden_fc = 100
+        self.hidden_dim =fc_size
 
         #rnn module
         # self.rnn = nn.LSTM(
@@ -121,7 +120,7 @@ class RNN(nn.Module):
 class RNNTopic(nn.Module):
 
     def __init__(self, vocab_size, embed_size, num_output, topic_size, hidden_size=64,
-                                          num_layers=2, batch_first=True, use_gpu=False, embeddings = None):
+                                          num_layers=2, batch_first=True, use_gpu=False, embeddings=None, emb_drop=None, fc_size=None):
 
         '''
         :param vocab_size: vocab size
@@ -140,11 +139,11 @@ class RNNTopic(nn.Module):
         if embeddings is not None:
             self.encoder.weight = nn.Parameter(embeddings)
         self.batch_first = batch_first
-        self.drop_en = nn.Dropout(p=0.8)
+        self.drop_en = nn.Dropout(p=emb_drop)
         self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
         self.hidden_dim = hidden_size
-        self.hidden_fc = 100
+        self.hidden_fc = fc_size
 
         #rnn module
         # self.rnn = nn.LSTM(
@@ -158,7 +157,7 @@ class RNNTopic(nn.Module):
         self.rnncell = LSTMtopicCell(
             input_size=embed_size,
             hidden_size=hidden_size,
-            topic_size = topic_size
+            topic_size=topic_size
         )
 
         self.bn2 = nn.BatchNorm1d(self.hidden_fc)

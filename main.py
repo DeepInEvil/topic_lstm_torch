@@ -37,6 +37,10 @@ parser.add_argument('--classes', default=2, type=int, metavar='N', help='number 
 parser.add_argument('--min-samples', default=3, type=int, metavar='N', help='min number of tokens')
 parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
 parser.add_argument('--early-stopping', default=3, type=int, help='early stopping on validation set')
+parser.add_argument('--fc-layer', default=100, type=int, help='fully connected size after lstm')
+parser.add_argument('--emb-drop', default=0.8, type=float, help='embeddidng dropout')
+parser.add_argument('--mit-topic', default=False, help='with or without topic embedding')
+
 args = parser.parse_args()
 domains = ['kitchen', 'electronics', 'dvd', 'books']
 
@@ -165,8 +169,11 @@ def train(train_loader, model, criterion, optimizer, epoch, lda_model, lda_dicti
         target_var = torch.autograd.Variable(target, requires_grad = False)
 
         # compute output
-        #output = model(input_var)
-        output = model(input_var, topic_var)
+        if args.mit_topic:
+            output = model(input_var, topic_var)
+        else:
+            output = model(input_var)
+
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         #print (out)
@@ -218,8 +225,10 @@ def validate(val_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        #output = model(input_var)
-        output = model(input_var, topic_var)
+        if args.mit_topic:
+            output = model(input_var, topic_var)
+        else:
+            output = model(input_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -268,8 +277,10 @@ def test(test_loader, model, criterion, lda_model, lda_dictionary, word2id):
         input_var = torch.autograd.Variable(input, requires_grad = False)
         target_var = torch.autograd.Variable(target, requires_grad = False)
         # compute output
-        #output = model(input_var)
-        output = model(input_var, topic_var)
+        if args.mit_topic:
+            output = model(input_var, topic_var)
+        else:
+            output = model(input_var)
         loss = criterion(output, target_var)
         out = (torch.max(output, 1))[1].cpu()
         # measure accuracy and record loss
@@ -328,12 +339,15 @@ def run_model(domain):
 
     # create model
     print("===> creating rnn model ...")
-    # model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
-    #             num_output=args.classes, hidden_size=args.hidden_size,
-    #             num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
-    model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
-                num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
-                num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings)
+    if args.mit_topic:
+        model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
+                         num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
+                         num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings, emb_drop=args.emb_drop, fc_size=args.fc_layer)
+    else:
+        model = RNN(vocab_size=vocab_size, embed_size=args.embedding_size,
+                    num_output=args.classes, hidden_size=args.hidden_size,
+                    num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings, emb_drop=args.emb_drop, fc_size=args.fc_layer)
+
     print(model)
 
     # optimizer and loss
