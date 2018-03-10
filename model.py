@@ -30,7 +30,8 @@ class RNN(nn.Module):
         self.drop_en = nn.Dropout(p=emb_drop)
         self.drop_fc = nn.Dropout(p=0.5)
         self.use_gpu = use_gpu
-        self.hidden_dim =fc_size
+        self.hidden_dim = hidden_size
+        self.hidden_fc = fc_size
 
         #rnn module
         # self.rnn = nn.LSTM(
@@ -132,7 +133,7 @@ class RNNTopic(nn.Module):
         '''
 
         super(RNNTopic, self).__init__()
-
+        print ("running model with topic embedding")
         # embedding
         self.embedding_dim = embed_size
         self.encoder = nn.Embedding(vocab_size, embed_size, padding_idx=0)
