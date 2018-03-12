@@ -97,17 +97,6 @@ def get_id2word(idx, idx2w_dict):
         return '__UNK__'
 
 
-def get_words(sent, idx2word):
-    """
-    get words from word2id dict
-    :param texts:
-    :return:
-    """
-    out_sent = [get_id2word(idx, idx2word) for idx in sent]
-    #print (out_sent)
-    return out_sent
-
-
 def get_theta(texts, lda, dictionari, idx2word):
     """
     get doc-topic distribution vector for all reviews
@@ -340,6 +329,7 @@ def run_model(domain):
     # create model
     print("===> creating rnn model ...")
     if args.mit_topic:
+        print ("with topic vectors.")
         model = RNNTopic(vocab_size=vocab_size, embed_size=args.embedding_size,
                          num_output=args.classes, topic_size=50, hidden_size=args.hidden_size,
                          num_layers=args.layers, batch_first=True, use_gpu=args.cuda, embeddings=embeddings, emb_drop=args.emb_drop, fc_size=args.fc_layer)
