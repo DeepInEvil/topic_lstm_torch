@@ -16,7 +16,7 @@ do
               for early_s in "${early_stop[@]}"
                 do
                   #python ./main.py --early-stopping $early_s --batch-size $batch --hidden-size $lstm_h --fc-layer $fc_s --emb-drop $emb_d --mit-topic true >./mit_topic/$batch_$lstm_h_$fc_s$emb_d_$early_s.txt
-                  python ./main.py --early-stopping $early_s --batch-size $batch --hidden-size $lstm_h --fc-layer $fc_s --emb-drop $emb_d >./ohne_topic/$batch_$lstm_h_$fc_s$emb_d_$ear
+                  python ./main.py --early-stopping $early_s --batch-size $batch --hidden-size $lstm_h --fc-layer $fc_s --emb-drop $emb_d >./ohne_topic/$batch'_'$lstm_h'_'$fc_s'_'$emb_d'_'$early_s.txt
                 done
             done
         done
