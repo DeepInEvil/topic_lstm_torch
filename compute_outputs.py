@@ -9,6 +9,7 @@ def convert_text2dict(filename):
     try:
         out_dict = json.loads(json_acceptable_string)
     except ValueError:
+        print filename
         print "file incomplete"
         out_dict = {}
         out_dict['books'] = 0.0
