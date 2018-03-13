@@ -10,6 +10,11 @@ def convert_text2dict(filename):
         out_dict = json.loads(json_acceptable_string)
     except ValueError:
         print "file incomplete"
+        out_dict = {}
+        out_dict['books'] = 0.0
+        out_dict['electronics'] = 0.0
+        out_dict['kitchen'] = 0.0
+        out_dict['dvd'] = 0.0
     return out_dict
 
 
