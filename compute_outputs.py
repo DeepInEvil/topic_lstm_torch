@@ -6,7 +6,10 @@ from scipy import stats
 def convert_text2dict(filename):
     last_line = file(filename, "r").readlines()[-1]
     json_acceptable_string = last_line.replace('\"', '').replace('\n', '').replace("'", "\"")
-    out_dict = json.loads(json_acceptable_string)
+    try:
+        out_dict = json.loads(json_acceptable_string)
+    except ValueError:
+        print "file incomplete"
     return out_dict
 
 
@@ -17,7 +20,7 @@ def calculate_stats(dir):
     ktchn = []
     files = os.listdir(dir)
     for file in files:
-        out_dict = (dir + '/' + file)
+        out_dict = convert_text2dict(dir + '/' + file)
         books.append(out_dict['books'])
         elecs.append(out_dict['electronics'])
         dvds.append(out_dict['dvd'])
